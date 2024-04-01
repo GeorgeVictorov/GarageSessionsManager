@@ -1,1 +1,1 @@
-# bot-template
+# Garage Assistant

@@ -1,1 +1,3 @@
-
+MESSAGES = {
+    '/start': 'Welcome!'
+}
