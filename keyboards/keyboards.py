@@ -1,6 +1,26 @@
 import datetime
 import calendar
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from config_data.sessions_config import TYPES
+
+
+def generate_types_duration(hours=3):
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[])
+
+    types_row = [InlineKeyboardButton(text=t, callback_data=t) for t in TYPES]
+    keyboard.inline_keyboard.append(types_row)
+
+    keyboard.inline_keyboard.append([
+        InlineKeyboardButton(text='-', callback_data=f'less-{hours}'),
+        InlineKeyboardButton(text=str(hours), callback_data='ignore'),
+        InlineKeyboardButton(text='+', callback_data=f'more-{hours}')
+    ])
+
+    keyboard.inline_keyboard.append([
+        InlineKeyboardButton(text='CONFIRM', callback_data='confirm_types'),
+    ])
+
+    return keyboard
 
 
 def generate_calendar(year=None, month=None):
@@ -28,8 +48,14 @@ def generate_calendar(year=None, month=None):
         calendar_markup.inline_keyboard.append(row)
 
     calendar_markup.inline_keyboard.append([
-        InlineKeyboardButton(text="<<", callback_data=f"prev-{year}-{month:02d}"),
-        InlineKeyboardButton(text=">>", callback_data=f"next-{year}-{month:02d}")
+        InlineKeyboardButton(text="<", callback_data=f"prev-{year}-{month:02d}"),
+        InlineKeyboardButton(text=">", callback_data=f"next-{year}-{month:02d}")
+    ])
+    calendar_markup.inline_keyboard.append([
+        InlineKeyboardButton(text="RETURN", callback_data='return_calendar')
+    ])
+    calendar_markup.inline_keyboard.append([
+        InlineKeyboardButton(text="CONFIRM", callback_data='confirm_calendar')
     ])
 
     return calendar_markup
