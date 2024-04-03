@@ -18,10 +18,10 @@ def generate_types_duration(hours=3, disable_less=False) -> InlineKeyboardMarkup
     keyboard.inline_keyboard.append(hours_row)
 
     keyboard.inline_keyboard.append([
-        InlineKeyboardButton(text='CONFIRM', callback_data='confirm_types'),
+        InlineKeyboardButton(text='Confirm', callback_data='confirm_types'),
     ])
     keyboard.inline_keyboard.append([
-        InlineKeyboardButton(text='RETURN', callback_data='return_types'),
+        InlineKeyboardButton(text='Back to calendar', callback_data='return_types'),
     ])
 
     return keyboard
@@ -60,7 +60,43 @@ def generate_calendar(year=None, month=None) -> InlineKeyboardMarkup:
     ])
 
     calendar_markup.inline_keyboard.append([
-        InlineKeyboardButton(text="CONFIRM", callback_data='confirm_calendar')
+        InlineKeyboardButton(text="Confirm", callback_data='confirm_calendar')
     ])
 
     return calendar_markup
+
+
+def generate_hours_keyboard(selected_date: str) -> InlineKeyboardMarkup:
+    hours_markup = InlineKeyboardMarkup(inline_keyboard=[])
+
+    selected_date = datetime.datetime.strptime(selected_date, '%Y-%m-%d')
+    start_time = datetime.datetime.combine(selected_date.date(), datetime.datetime.min.time())
+    end_time = datetime.datetime.combine(selected_date.date(), datetime.datetime.max.time())
+
+    # Define the interval for each hour (e.g., every hour)
+    interval = datetime.timedelta(hours=1)
+
+    current_time = start_time
+    row = []
+    while current_time <= end_time:
+        # Add the hour as a button
+        callback_data = f"choose-hour-{current_time.strftime('%H:%M')}"
+        row.append(InlineKeyboardButton(text=current_time.strftime('%H:%M'), callback_data=callback_data))
+
+        # Add a newline after every 3 buttons
+        if len(row) == 4:
+            hours_markup.inline_keyboard.append(row)
+            row = []
+
+        current_time += interval
+
+    # Add the remaining buttons if any
+    if row:
+        hours_markup.inline_keyboard.append(row)
+
+    # Add a button to go back to the calendar
+    hours_markup.inline_keyboard.append([
+        InlineKeyboardButton(text="Back to Calendar", callback_data="back_to_calendar")
+    ])
+
+    return hours_markup

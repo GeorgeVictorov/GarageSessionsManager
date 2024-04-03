@@ -4,7 +4,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message, ContentType, BufferedInputFile
 from lexicon.lexicon import MESSAGES
 from config_data.sessions_config import TYPES
-from keyboards.keyboards import generate_calendar, generate_types_duration
+from keyboards.keyboards import generate_calendar, generate_types_duration, generate_hours_keyboard
 
 router = Router()
 session = {}
@@ -34,8 +34,8 @@ async def types_navigation(callback_query: CallbackQuery):
 
     if action == 'confirm_types' and session[user_id]['type'] and session[user_id]['type'] != 'Nothing':
         await callback_query.answer()
-        await callback_query.message.edit_text(text=f'Choose a day: {session}')
-        await callback_query.message.edit_reply_markup(reply_markup=generate_calendar())
+        await callback_query.message.edit_text(text=f'Choose time: {session}')
+        await callback_query.message.edit_reply_markup(reply_markup=generate_hours_keyboard(session[user_id]['date']))
     elif action == 'return_types':
         session[user_id]['date'] = ''
         session[user_id]['type'] = 'Nothing'
