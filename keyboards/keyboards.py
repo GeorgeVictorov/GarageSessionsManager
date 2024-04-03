@@ -1,7 +1,10 @@
-import datetime
 import calendar
+from datetime import datetime, timedelta
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from config_data.sessions_config import TYPES
+from database.sessions import get_unavailable_time
+
+SESSIONS = 'garage_sessions'
 
 
 def generate_types_duration(hours=3, disable_less=False) -> InlineKeyboardMarkup:
@@ -29,9 +32,9 @@ def generate_types_duration(hours=3, disable_less=False) -> InlineKeyboardMarkup
 
 def get_current_or_specified_date(year=None, month=None) -> datetime:
     if year is None or month is None:
-        current_date = datetime.datetime.now()
+        current_date = datetime.now()
     else:
-        current_date = datetime.datetime(year, month, 1)
+        current_date = datetime(year, month, 1)
     return current_date
 
 
@@ -66,37 +69,69 @@ def generate_calendar(year=None, month=None) -> InlineKeyboardMarkup:
     return calendar_markup
 
 
-def generate_hours_keyboard(selected_date: str) -> InlineKeyboardMarkup:
+def generate_hours_keyboard(selected_date: str, selected_duration: int) -> InlineKeyboardMarkup:
     hours_markup = InlineKeyboardMarkup(inline_keyboard=[])
 
-    selected_date = datetime.datetime.strptime(selected_date, '%Y-%m-%d')
-    start_time = datetime.datetime.combine(selected_date.date(), datetime.datetime.min.time())
-    end_time = datetime.datetime.combine(selected_date.date(), datetime.datetime.max.time())
+    selected_date = datetime.strptime(selected_date, '%Y-%m-%d')
+    start_time = datetime.combine(selected_date.date(), datetime.min.time())
+    end_time = datetime.combine(selected_date.date(), datetime.max.time())
 
-    # Define the interval for each hour (e.g., every hour)
-    interval = datetime.timedelta(hours=1)
-
-    current_time = start_time
     row = []
-    while current_time <= end_time:
-        # Add the hour as a button
-        callback_data = f"choose-hour-{current_time.strftime('%H:%M')}"
-        row.append(InlineKeyboardButton(text=current_time.strftime('%H:%M'), callback_data=callback_data))
 
-        # Add a newline after every 3 buttons
+    for current_time in range(0, int((end_time - start_time).total_seconds() // 3600) + 1, 1):
+        session_start = start_time + timedelta(hours=current_time)
+        session_end = session_start + timedelta(hours=selected_duration)
+
+        if get_unavailable_time(session_start, session_end) > 0:
+            row.append(InlineKeyboardButton(text="Unavailable", callback_data="unavailable"))
+        else:
+            callback_data = f"choose_hour-{session_start.strftime('%H:%M:%S')}"
+            row.append(InlineKeyboardButton(text=session_start.strftime('%H:%M'), callback_data=callback_data))
+
         if len(row) == 4:
             hours_markup.inline_keyboard.append(row)
             row = []
 
-        current_time += interval
-
-    # Add the remaining buttons if any
     if row:
         hours_markup.inline_keyboard.append(row)
 
-    # Add a button to go back to the calendar
-    hours_markup.inline_keyboard.append([
-        InlineKeyboardButton(text="Back to Calendar", callback_data="back_to_calendar")
+    hours_markup.inline_keyboard.extend([
+        [InlineKeyboardButton(text="Confirm", callback_data="confirm_session")],
+        [InlineKeyboardButton(text="Back to types", callback_data="back_to_types")]
     ])
 
     return hours_markup
+
+# def generate_hours_keyboard(selected_date: str) -> InlineKeyboardMarkup:
+#     hours_markup = InlineKeyboardMarkup(inline_keyboard=[])
+#
+#     selected_date = datetime.datetime.strptime(selected_date, '%Y-%m-%d')
+#     start_time = datetime.datetime.combine(selected_date.date(), datetime.datetime.min.time())
+#     end_time = datetime.datetime.combine(selected_date.date(), datetime.datetime.max.time())
+#
+#     interval = datetime.timedelta(hours=1)
+#
+#     current_time = start_time
+#     row = []
+#     while current_time <= end_time:
+#         callback_data = f"choose_hour-{current_time.strftime('%H:%M')}"
+#         row.append(InlineKeyboardButton(text=current_time.strftime('%H:%M'), callback_data=callback_data))
+#
+#         if len(row) == 4:
+#             hours_markup.inline_keyboard.append(row)
+#             row = []
+#
+#         current_time += interval
+#
+#     if row:
+#         hours_markup.inline_keyboard.append(row)
+#
+#     hours_markup.inline_keyboard.append([
+#         InlineKeyboardButton(text="Confirm", callback_data="confirm_session")
+#     ])
+#
+#     hours_markup.inline_keyboard.append([
+#         InlineKeyboardButton(text="Back to types", callback_data="back_to_types")
+#     ])
+#
+#     return hours_markup

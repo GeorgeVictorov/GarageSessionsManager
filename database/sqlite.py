@@ -4,7 +4,7 @@ from logger.logger import setup_logger
 
 # from config_data.config import load_config
 
-DATABASE_FILE = 'garage.db'
+DATABASE_FILE = 'database/garage.db'
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
 
@@ -46,13 +46,13 @@ class Database:
         try:
             cur = self.get_connection().cursor()
             cur.execute(f'''create table if not exists {SESSIONS} (
-                                                id serial primary key,
+                                                id integer primary key,
                                                 user_id int,
                                                 user_username text,
-                                                session_datetime datetime,
+                                                session_start datetime,
+                                                session_end datetime,
                                                 duration int,
                                                 type int,
-                                                total_price int,
                                                 is_payed boolean default false,
                                                 is_canceled boolean default false
                                               )''')
@@ -65,6 +65,7 @@ class Database:
                                               )''')
 
             self.db_connection.commit()
+            cur.close()
             logging.info(f"Database tables: «{SESSIONS}», «{TYPES}» created or verified.")
 
         except Exception as e:
@@ -74,22 +75,46 @@ class Database:
         try:
             cur = self.get_connection().cursor()
             cur.execute(f'''insert into {TYPES}
-                            select 1, "drummer", 300
+                            select 1, "drummer", 150
                             where
                                 not exists (select 1 from {TYPES} where id = 1)
                             ''')
 
             cur.execute(f'''insert into {TYPES}
-                                        select 2, "band", 500
-                                        where
-                                            not exists (select 1 from {TYPES} where id = 2)
-                                        ''')
+                            select 2, "small_band", 200
+                            where
+                                not exists (select 1 from {TYPES} where id = 2)
+                            ''')
+            cur.execute(f'''insert into {TYPES}
+                            select 3, "norm_band", 300
+                            where
+                                not exists (select 1 from {TYPES} where id = 3)
+                            ''')
 
             self.db_connection.commit()
+            cur.close()
             logging.info(f"Table: «{TYPES}» set with default values.")
 
         except Exception as e:
             logging.error(f"Error setting default values in «{TYPES}»: {e}.")
+
+    def sessions_random_data(self):
+        try:
+            cur = self.get_connection().cursor()
+            cur.execute(f"""INSERT INTO {SESSIONS} (user_id, user_username, session_start, session_end, duration, type)
+                            VALUES
+                                (288878378, 'georgenegeorge', '2024-04-03 15:00:00', '2024-04-03 18:00:00', 3, 1),
+                                (288878378, 'georgenegeorge', '2024-04-03 19:00:00', '2024-04-03 20:00:00', 1, 2),
+                                (288878378, 'georgenegeorge', '2024-04-03 09:00:00', '2024-04-03 11:00:00', 2, 1),
+                                (288878378, 'georgenegeorge', '2024-04-03 11:00:00', '2024-04-03 14:00:00', 3, 3),
+                                (288878378, 'georgenegeorge', '2024-04-03 23:00:00', '2024-04-05 02:00:00', 3, 3);
+                                """)
+            self.db_connection.commit()
+            cur.close()
+            logging.info(f"Table: «{SESSIONS}» set with test values.")
+
+        except Exception as e:
+            logging.error(f"Error setting default values in «{SESSIONS}»: {e}.")
 
     def close_database(self):
         if self.db_connection:
@@ -101,16 +126,17 @@ class Database:
         else:
             logging.warning("No open database connection to close or connection is already closed.")
 
-# setup_logger()
-# db_manager = Database()
-# conn = db_manager.get_connection()
-# db_manager.get_connection()
+
+db_manager = Database()
+conn = db_manager.get_connection()
+db_manager.get_connection()
 # db_manager.create_tables()
 # db_manager.set_default_values()
-# cur = conn.cursor()
-# cur.execute(f'select * from {TYPES}')
-# column_names = [column[0] for column in cur.description]
-# print(' '.join(name.ljust(10) for name in column_names))
-# for row in cur:
-#     print(' '.join(str(item).ljust(10) for item in row))
-# db_manager.close_database()
+# db_manager.sessions_random_data()
+cur = conn.cursor()
+cur.execute(f'select * from {SESSIONS}')
+column_names = [column[0] for column in cur.description]
+print(' '.join(name.ljust(20) for name in column_names))
+for row in cur:
+    print(' '.join(str(item).ljust(20) for item in row))
+cur.close()

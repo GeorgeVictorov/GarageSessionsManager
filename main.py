@@ -5,10 +5,23 @@ from config_data.config import load_config
 from handlers import user_handlers, other_handlers
 from logger.logger import setup_logger
 from keyboards.main_menu import set_main_menu
+from database.sqlite import Database
+
+
+async def init_db():
+    try:
+        db_manager = Database()
+        db_manager.create_tables()
+        db_manager.set_default_values()
+        logging.info('Database initialized successfully.')
+    except Exception as e:
+        logging.error(f"Error initializing database: {e}")
 
 
 async def main():
     setup_logger()
+
+    await init_db()
 
     try:
         config = load_config()

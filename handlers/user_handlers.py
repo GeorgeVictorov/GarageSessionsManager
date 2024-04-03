@@ -33,9 +33,10 @@ async def types_navigation(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
 
     if action == 'confirm_types' and session[user_id]['type'] and session[user_id]['type'] != 'Nothing':
-        await callback_query.answer()
-        await callback_query.message.edit_text(text=f'Choose time: {session}')
-        await callback_query.message.edit_reply_markup(reply_markup=generate_hours_keyboard(session[user_id]['date']))
+        await callback_query.answer(text=f'{session}')
+        await callback_query.message.edit_text(text=f'Choose time:')
+        await callback_query.message.edit_reply_markup(
+            reply_markup=generate_hours_keyboard(session[user_id]['date'], session[user_id]['duration']))
     elif action == 'return_types':
         session[user_id]['date'] = ''
         session[user_id]['type'] = 'Nothing'
