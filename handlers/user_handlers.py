@@ -2,22 +2,33 @@ import calendar
 from datetime import datetime
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery, Message, ContentType, BufferedInputFile
+from aiogram.types import CallbackQuery, Message
 from lexicon.lexicon import MESSAGES
 from config_data.sessions_config import TYPES
+from services.services import SessionManager
 from keyboards.keyboards import generate_calendar, generate_types_duration, generate_hours_keyboard, \
     generate_confirm_session
 
 router = Router()
 session = {}
+session_manager = SessionManager()
 
 
-# def parse_session_data(session: dict, user_id: int):
-#     session_date = f'{session[user_id]["date"]} {session[user_id]["time"]}'
-#     session_date = datetime.strptime(session_date, '%Y-%m-%d %H:%M:%S')
-#     duration = session[user_id]['duration']
-#     session_type = session[user_id]['type']
-#     return session_date, duration, session_type
+def parse_datetime(date_time_str):
+    try:
+        return datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        return None
+
+
+def parse_session_data(session_data: dict):
+    session_date_str = f'{session_data.get("date", "")} {session_data.get("time", "")}'
+    duration = session_data.get('duration', 0)
+    session_type = session_data.get('type', '')
+
+    session_date = parse_datetime(session_date_str)
+
+    return session_date, duration, session_type
 
 
 @router.message(Command(commands='start'))
@@ -26,17 +37,17 @@ async def start(message: Message):
 
 
 @router.message(Command(commands='new'))
-async def start(message: Message):
+async def new_session(message: Message):
     user_id = message.from_user.id
     username = message.from_user.username
 
-    session[user_id] = {
+    session_manager.set_session(user_id, {
         'username': username,
         'type': 'Nothing',
         'duration': 3,
         'date': '',
         'time': ''
-    }
+    })
 
     await message.answer(text='Choose a date:', reply_markup=generate_calendar())
 
@@ -47,11 +58,8 @@ async def hours_navigation(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     username = callback_query.from_user.username
 
-    if action == 'confirm_session' and session[user_id]['time']:
-        session_date = f'{session[user_id]['date']} {session[user_id]['time']}'
-        session_date = datetime.strptime(session_date, '%Y-%m-%d %H:%M:%S')
-        duration = session[user_id]['duration']
-        session_type = session[user_id]['type']
+    if action == 'confirm_session' and session_manager.get_session(user_id)['time']:
+        session_date, duration, session_type = parse_session_data(session_manager.get_session(user_id))
         await callback_query.message.edit_text(
             text=f'New session for <b>{username}</b>'
                  f'\n\nStart time: <b>{session_date}</b>'
@@ -59,8 +67,10 @@ async def hours_navigation(callback_query: CallbackQuery):
         await callback_query.message.edit_reply_markup(reply_markup=generate_confirm_session())
 
     elif action == 'back_to_types':
-        session[user_id]['time'] = ''
-        session[user_id]['type'] = 'Nothing'
+        session_data = session_manager.get_session(user_id)
+        session_data['time'] = ''
+        session_data['type'] = 'Nothing'
+        session_manager.set_session(user_id, session_data)
         await callback_query.message.edit_text(text='Choose time:',
                                                reply_markup=generate_types_duration())
 
@@ -70,12 +80,14 @@ async def hours_choose(callback_query: CallbackQuery):
     action, hour = callback_query.data.split('-')
     user_id = callback_query.from_user.id
 
-    if hour != session[user_id]['time']:
-        session[user_id]['time'] = hour
+    session_data = session_manager.get_session(user_id)
+    if hour != session_data['time']:
+        session_data['time'] = hour
         chosen_hour_message = f"Start time: <b>{hour.split(':')[0]}:{hour.split(':')[1]}</b>"
+        session_manager.set_session(user_id, session_data)
         await callback_query.message.edit_text(chosen_hour_message, parse_mode='HTML',
-                                               reply_markup=generate_hours_keyboard(session[user_id]['date'],
-                                                                                    session[user_id]['duration']))
+                                               reply_markup=generate_hours_keyboard(session_data['date'],
+                                                                                    session_data['duration']))
 
 
 @router.callback_query(F.data.in_({'confirm_types', 'return_types', *TYPES}))
@@ -83,18 +95,21 @@ async def types_navigation(callback_query: CallbackQuery):
     action = callback_query.data
     user_id = callback_query.from_user.id
 
-    if action == 'confirm_types' and session[user_id]['type'] and session[user_id]['type'] != 'Nothing':
+    session_data = session_manager.get_session(user_id)
+    if action == 'confirm_types' and session_data['type'] and session_data['type'] != 'Nothing':
         await callback_query.message.edit_text(text=f'Choose time:')
         await callback_query.message.edit_reply_markup(
-            reply_markup=generate_hours_keyboard(session[user_id]['date'], session[user_id]['duration']))
+            reply_markup=generate_hours_keyboard(session_data['date'], session_data['duration']))
     elif action == 'return_types':
-        session[user_id]['date'] = ''
-        session[user_id]['type'] = 'Nothing'
+        session_data['date'] = ''
+        session_data['type'] = 'Nothing'
+        session_manager.set_session(user_id, session_data)
         await callback_query.message.edit_text(text='Choose a date:', reply_markup=generate_calendar())
     elif action in TYPES:
-        if action != session[user_id]['type']:
-            session[user_id]['type'] = action
-            hour = session[user_id]['duration']
+        if action != session_data['type']:
+            session_data['type'] = action
+            hour = session_data['duration']
+            session_manager.set_session(user_id, session_data)
             await callback_query.message.edit_text(text=f'<b>{action}</b> selected. <b>{hour}</b> hours.',
                                                    parse_mode='HTML',
                                                    reply_markup=generate_types_duration(hour))
@@ -106,14 +121,14 @@ async def types_duration(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     hour = int(hour)
 
+    session_data = session_manager.get_session(user_id)
     if action == 'less' and hour > 1:
         hour -= 1
-        session[user_id]['duration'] = hour
     elif action == 'more':
         hour += 1
-        session[user_id]['duration'] = hour
-
-    session_type = session[user_id]['type']
+    session_data['duration'] = hour
+    session_manager.set_session(user_id, session_data)
+    session_type = session_data['type']
     await callback_query.message.edit_text(text=f'<b>{session_type}</b> selected. <b>{hour}</b> hours.',
                                            parse_mode='HTML',
                                            reply_markup=generate_types_duration(hour, disable_less=hour == 1))
@@ -139,7 +154,8 @@ async def calendar_navigation(callback_query: CallbackQuery):
 @router.callback_query(F.data == 'confirm_calendar')
 async def calendar_confirm(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    if session[user_id]['date']:
+    session_data = session_manager.get_session(user_id)
+    if session_data['date']:
         await callback_query.message.edit_text(text='Choose type and duration:', reply_markup=generate_types_duration())
 
 
@@ -151,8 +167,10 @@ async def calendar_choose(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     chosen_date = f'{year}-{month}-{day}'
 
-    if chosen_date != session[user_id]['date']:
-        session[user_id]['date'] = chosen_date
+    session_data = session_manager.get_session(user_id)
+    if chosen_date != session_data['date']:
+        session_data['date'] = chosen_date
+        session_manager.set_session(user_id, session_data)
         chosen_date_message = f"Date: <b>{day:02d}</b> {calendar.month_name[month]}."
         await callback_query.message.edit_text(chosen_date_message, parse_mode='HTML',
                                                reply_markup=generate_calendar(year, month))
