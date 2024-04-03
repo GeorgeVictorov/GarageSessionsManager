@@ -20,6 +20,10 @@ def generate_types_duration(hours=3):
         InlineKeyboardButton(text='CONFIRM', callback_data='confirm_types'),
     ])
 
+    keyboard.inline_keyboard.append([
+        InlineKeyboardButton(text='RETURN', callback_data='return_types'),
+    ])
+
     return keyboard
 
 
@@ -51,9 +55,7 @@ def generate_calendar(year=None, month=None):
         InlineKeyboardButton(text="<", callback_data=f"prev-{year}-{month:02d}"),
         InlineKeyboardButton(text=">", callback_data=f"next-{year}-{month:02d}")
     ])
-    calendar_markup.inline_keyboard.append([
-        InlineKeyboardButton(text="RETURN", callback_data='return_calendar')
-    ])
+
     calendar_markup.inline_keyboard.append([
         InlineKeyboardButton(text="CONFIRM", callback_data='confirm_calendar')
     ])

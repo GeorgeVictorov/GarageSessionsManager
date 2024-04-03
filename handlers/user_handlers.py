@@ -1,4 +1,4 @@
-from datetime import datetime
+import calendar
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message, ContentType, BufferedInputFile
@@ -19,27 +19,36 @@ async def start(message: Message):
 async def start(message: Message):
     user_id = message.from_user.id
     username = message.from_user.username
-    session[user_id] = {'username': username, 'type': '', 'duration': 3, 'date': '', 'time': ''}
-    await message.answer('Select type and duration:', reply_markup=generate_types_duration())
-    await message.answer(text=f'Duration: <b>{3}</b> hours.', parse_mode='HTML')
+    session[user_id] = {'username': username,
+                        'type': '',
+                        'duration': 3,
+                        'date': '',
+                        'time': ''}
+    await message.answer(text='Choose a date:', reply_markup=generate_calendar())
 
 
-@router.callback_query(F.data.startswith(('confirm_types', *TYPES)))
+@router.callback_query(F.data.in_({'confirm_types', 'return_types', *TYPES}))
 async def handle_types(callback_query: CallbackQuery):
     action = callback_query.data
     user_id = callback_query.from_user.id
 
-    if action == 'confirm_types':
+    if action == 'confirm_types' and session[user_id]['type']:
         await callback_query.answer()
-        await callback_query.message.answer(text=f'Choose a day {session}')
+        await callback_query.message.edit_text(text=f'Choose a day: {session}')
         await callback_query.message.edit_reply_markup(reply_markup=generate_calendar())
+    elif action == 'return_types':
+        session[user_id]['date'] = ''
+        await callback_query.message.edit_text(text='Choose a date:', reply_markup=generate_calendar())
     elif action in TYPES:
-        session[user_id]['type'] = action
-        await callback_query.message.answer(text=f'<b>{action}</b> type selected.', parse_mode='HTML')
+        if action != session[user_id]['type']:
+            session[user_id]['type'] = action
+            hours = session[user_id]['duration']
+            await callback_query.message.edit_text(text=f'<b>{action}</b> type selected.', parse_mode='HTML',
+                                                   reply_markup=generate_types_duration())
 
 
 @router.callback_query(F.data.startswith(('prev', 'next')))
-async def handle_nav_calendar(callback_query: CallbackQuery):
+async def calendar_navigation(callback_query: CallbackQuery):
     action, year, month = callback_query.data.split('-')
     year = int(year)
     month = int(month)
@@ -56,14 +65,24 @@ async def handle_nav_calendar(callback_query: CallbackQuery):
     await callback_query.message.edit_reply_markup(reply_markup=generate_calendar(year, month))
 
 
-@router.callback_query(F.data == 'choose')
-async def handle_choose(callback_query: CallbackQuery):
+@router.callback_query(F.data == 'confirm_calendar')
+async def calendar_confirm(callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    if session[user_id]['date']:
+        await callback_query.message.edit_text(text='Choose type and duration:', reply_markup=generate_types_duration())
+
+
+@router.callback_query(F.data.startswith('choose'))
+async def calendar_choose(callback_query: CallbackQuery):
     data_parts = callback_query.data.split('-')
     year = int(data_parts[1])
     month = int(data_parts[2])
     day = int(data_parts[3])
 
-    chosen_date_message = f"You have chosen the date: {year}-{month:02d}-{day:02d}"
-    await callback_query.message.answer(chosen_date_message)
-    # await callback_query.message.edit_reply_markup(reply_markup=None)
-    # await callback_query.message.edit_reply_markup(reply_markup=generate_calendar(year, month))
+    user_id = callback_query.from_user.id
+    if f'{year}-{month}-{day}' != session[user_id]['date']:
+        session[user_id]['date'] = f'{year}-{month}-{day}'
+        chosen_date_message = f"Date: <b>{day:02d}</b> {calendar.month_name[month]}."
+        await callback_query.answer(text=f'{session}')
+        await callback_query.message.edit_text(chosen_date_message, parse_mode='HTML',
+                                               reply_markup=generate_calendar(year, month))
