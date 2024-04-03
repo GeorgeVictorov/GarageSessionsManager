@@ -21,10 +21,10 @@ def generate_types_duration(hours=3, disable_less=False) -> InlineKeyboardMarkup
     keyboard.inline_keyboard.append(hours_row)
 
     keyboard.inline_keyboard.append([
-        InlineKeyboardButton(text='Confirm', callback_data='confirm_types'),
+        InlineKeyboardButton(text='✔️Confirm', callback_data='confirm_types'),
     ])
     keyboard.inline_keyboard.append([
-        InlineKeyboardButton(text='Back to calendar', callback_data='return_types'),
+        InlineKeyboardButton(text='🔙 Back to calendar', callback_data='return_types'),
     ])
 
     return keyboard
@@ -63,7 +63,7 @@ def generate_calendar(year=None, month=None) -> InlineKeyboardMarkup:
     ])
 
     calendar_markup.inline_keyboard.append([
-        InlineKeyboardButton(text="Confirm", callback_data='confirm_calendar')
+        InlineKeyboardButton(text="✔️ Confirm", callback_data='confirm_calendar')
     ])
 
     return calendar_markup
@@ -85,7 +85,7 @@ def generate_hours_keyboard(selected_date: str, selected_duration: int) -> Inlin
         if get_unavailable_time(session_start, session_end) > 0:
             row.append(InlineKeyboardButton(text="Unavailable", callback_data="unavailable"))
         else:
-            callback_data = f"choose_hour-{session_start.strftime('%H:%M:%S')}"
+            callback_data = f"hour-{session_start.strftime('%H:%M:%S')}"
             row.append(InlineKeyboardButton(text=session_start.strftime('%H:%M'), callback_data=callback_data))
 
         if len(row) == 4:
@@ -96,11 +96,28 @@ def generate_hours_keyboard(selected_date: str, selected_duration: int) -> Inlin
         hours_markup.inline_keyboard.append(row)
 
     hours_markup.inline_keyboard.extend([
-        [InlineKeyboardButton(text="Confirm", callback_data="confirm_session")],
-        [InlineKeyboardButton(text="Back to types", callback_data="back_to_types")]
+        [InlineKeyboardButton(text="✔️ Confirm", callback_data="confirm_session")],
+        [InlineKeyboardButton(text="🔙 Back to types", callback_data="back_to_types")]
     ])
 
     return hours_markup
+
+
+def generate_confirm_session() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[])
+
+    keyboard.inline_keyboard.append([
+        InlineKeyboardButton(text='✔️Confirm session', callback_data='session'),
+    ])
+    keyboard.inline_keyboard.append([
+        InlineKeyboardButton(text='🔙 Back to types', callback_data='return_session'),
+    ])
+
+    keyboard.inline_keyboard.append([
+        InlineKeyboardButton(text='✖️️ Cancel', callback_data='cancel_session'),
+    ])
+
+    return keyboard
 
 # def generate_hours_keyboard(selected_date: str) -> InlineKeyboardMarkup:
 #     hours_markup = InlineKeyboardMarkup(inline_keyboard=[])
