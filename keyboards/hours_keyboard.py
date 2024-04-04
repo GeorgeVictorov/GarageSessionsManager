@@ -12,7 +12,6 @@ def generate_hours_keyboard(selected_date: str, selected_duration: int) -> Inlin
     end_time = datetime.combine(selected_date.date(), datetime.max.time())
 
     unavailable_times = get_unavailable_times(selected_date)
-    # Convert start and end strings to datetime objects and subtract one minute from the start
     unavailable_intervals = [
         DateTimeRange(datetime.strptime(start, '%Y-%m-%d %H:%M:%S') + timedelta(hours=1),
                       datetime.strptime(end, '%Y-%m-%d %H:%M:%S')) - timedelta(minutes=1)
@@ -24,10 +23,8 @@ def generate_hours_keyboard(selected_date: str, selected_duration: int) -> Inlin
         session_start = start_time + timedelta(hours=current_time)
         session_end = session_start + timedelta(hours=selected_duration)
 
-        # Create a DateTimeRange for the proposed session
         proposed_session = DateTimeRange(session_start, session_end)
 
-        # Check if the proposed session overlaps with any existing booked sessions
         if any(interval.is_intersection(proposed_session) for interval in unavailable_intervals):
             row.append(InlineKeyboardButton(text="✖️", callback_data="unavailable"))
         else:

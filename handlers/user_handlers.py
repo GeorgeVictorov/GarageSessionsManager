@@ -87,7 +87,7 @@ async def session_navigation(callback_query: CallbackQuery):
         admin_ids = load_config().tg_bot.admin_ids
         for admin_id in admin_ids:
             admin_message = INFO['session_admin_info'].format(username, session_start, duration, session_type)
-            await callback_query.bot.send_message(admin_id, admin_message)
+            await callback_query.bot.send_message(admin_id, admin_message, parse_mode='HTML')
 
 
 @router.callback_query(F.data.in_({'confirm_session', 'back_to_types'}))
