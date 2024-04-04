@@ -42,10 +42,12 @@ async def hours_navigation(callback_query: CallbackQuery):
 
     if action == 'confirm_session' and session_manager.get_session(user_id)['time']:
         session_date, duration, session_type = parse_session_data(session_manager.get_session(user_id))
+        formatted_text = (f"New session for <b>{username}</b>"
+                          f"\n\nSession Date: <b>{session_date}</b>"
+                          f"\nDuration: <b>{duration} hours</b>"
+                          f"\nSession Type: <b>{session_type}</b>")
         await callback_query.message.edit_text(
-            text=f'New session for <b>{username}</b>'
-                 f'\n\nStart time: <b>{session_date}</b>'
-                 f'\n\nFor <b>{duration}</b> hours, type <b>{session_type}</b>', parse_mode='HTML')
+            text=formatted_text, parse_mode='HTML')
         await callback_query.message.edit_reply_markup(reply_markup=generate_confirm_session())
 
     elif action == 'back_to_types':
