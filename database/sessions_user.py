@@ -51,7 +51,7 @@ def upcoming_sessions(user_id: int) -> list:
                     select s.id, s.session_start, s.duration, t.type_desc
                     from {SESSIONS} s
                     inner join {TYPES} t on s.type = t.id
-                    where s.session_start >= ? and user_id = ?
+                    where s.session_start >= ? and user_id = ? and s.is_canceled = 0
                     order by 2
                 ''', (today, user_id))
         sessions = cursor.fetchall()
@@ -65,6 +65,20 @@ def upcoming_sessions(user_id: int) -> list:
                 'type_desc': session[3]
             }
             session_list.append(session_dict)
+        logging.info('Successfully retrieved sessions info.')
         return session_list
+    except Exception as e:
+        logging.error(f"An error occurred in upcoming_sessions function: {str(e)}.")
+
+
+def cancel_session(session_id: int):
+    database = Database()
+    conn = database.get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f'update {SESSIONS} set is_canceled = 1 where id = ?', (session_id,))
+        conn.commit()
+        cursor.close()
+        logging.info("Successfully canceled a session.")
     except Exception as e:
         logging.error(f"An error occurred in upcoming_sessions function: {str(e)}.")

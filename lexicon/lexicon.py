@@ -1,10 +1,30 @@
 MESSAGES: dict[str, str] = {
     '/start': '<b>Welcome to Garage Sessions Manager.</b>'
               '\n\nPress /new to book a new session.'
-              '\n\nPress /upcoming to get sessions info.',
+              '\n\nPress /upcoming to view upcoming sessions.',
     '/upcoming': '<b>Here are your upcoming sessions:</b>\n\n'
-                 '{}'
+                 '{}',
+    '/a_upcoming': '<b>Here are all upcoming sessions:</b>\n\n'
+                   '{}',
+    '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
+    '/help': '<b>Welcome to Garage Sessions Manager.</b>'
+             '\n\n<i>Garage Sessions Manager is a tool that facilitates booking sessions.'
+             '\n\nThe goal is to provide you with a seamless experience of managing your sessions.</i>'
+             '\n\nThere are 3 types of sessions available:'
+             '\n\n- <b>Drummer:</b> for solo drummers.'
+             '\n- <b>Small band:</b> for bands consisting of two people.'
+             '\n- <b>Norm Band:</b> for three or more people.'
+             '\n\nPress /start to begin.'
+             '\n\nPress /new to book a new session.'
+             '\n\nPress /upcoming to view sessions.'
+             '\n\nPress /cancel to cancel a session.',
+    '/admin': '<b>403 Forbidden</b>',
+    '/admin_upcoming': '<b>403 Forbidden</b>',
+    '/admin_cancel': '<b>403 Forbidden</b>',
+    '/admin_payment': '<b>403 Forbidden</b>',
+    '/admin_sessions': '<b>403 Forbidden</b>'
 }
+
 LEXICON_COMMANDS: dict[str, str] = {
     '/start': 'Welcome home boi.',
     '/new': 'Book new session.',
@@ -28,5 +48,10 @@ INFO = {
     'session_admin_info': "New session booked for <b>{}</b>"
                           "\n\nSession date: <b>{}</b>"
                           "\nDuration: <b>{} hours</b>"
-                          "\nSession type: <b>{}</b>"
+                          "\nSession type: <b>{}</b>",
+    '/admin': '<b>Welcome, {}!</b>'
+              '\n\nPress /admin_upcoming to view upcoming sessions.'
+              '\n\nPress /admin_cancel to cancel any session.'
+              '\n\nPress /admin_payment to approve payment.'
+              '\n\nPress /admin_sessions to get all session history.'
 }

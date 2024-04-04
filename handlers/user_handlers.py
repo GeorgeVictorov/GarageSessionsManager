@@ -4,11 +4,11 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from lexicon.lexicon import MESSAGES, INFO
 from services.services import SessionManager, parse_session_data
-from keyboards.keyboards import generate_confirm_session
+from keyboards.keyboards import generate_confirm_session, generate_sessions_keyboard
 from keyboards.calendar_keyboard import generate_calendar
 from keyboards.types_keyboard import generate_types_duration
 from keyboards.hours_keyboard import generate_hours_keyboard
-from database.sessions_user import book_new_session, upcoming_sessions
+from database.sessions_user import book_new_session, upcoming_sessions, cancel_session
 from config_data.sessions_config import TYPES
 from config_data.config import load_config
 
@@ -46,7 +46,8 @@ async def upcoming(message: Message):
     if booked_sessions:
         sessions_info = "\n".join([
             f"Session ID: <b>{user_session['id']}</b>\n"
-            f"Start Time: <b>{user_session['session_start']}</b>\n"
+            f"Start Time: <b>{user_session['session_start'].split()[0]} | "
+            f"{user_session['session_start'].split()[1][:5]}</b>\n"
             f"Duration: <b>{user_session['duration']}</b> hours\n"
             f"Session Type: <b>{user_session['type_desc']}</b>\n"
             for user_session in booked_sessions
@@ -56,6 +57,43 @@ async def upcoming(message: Message):
         response_message = "<b>You have no upcoming sessions.</b>"
 
     await message.answer(response_message, parse_mode='HTML')
+
+
+@router.message(Command(commands='cancel'))
+async def cancel(message: Message):
+    user_id = message.from_user.id
+
+    keyboard_markup = generate_sessions_keyboard(user_id)
+
+    if keyboard_markup.inline_keyboard:
+        response_message = MESSAGES['/cancel']
+    else:
+        response_message = "<b>You have no upcoming sessions.</b>"
+
+    await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+
+
+@router.callback_query(F.data.startswith('cancel_session'))
+async def cancel_upcoming_sessions(callback_query: CallbackQuery):
+    action, session_id = callback_query.data.split('-')
+    user_id = callback_query.from_user.id
+    cancel_session(int(session_id))
+
+    await callback_query.message.answer(f"Your session has been successfully canceled.")
+
+    keyboard_markup = generate_sessions_keyboard(user_id)
+
+    if keyboard_markup.inline_keyboard:
+        response_message = MESSAGES['/cancel']
+    else:
+        response_message = "<b>You have no upcoming sessions.</b>"
+
+    await callback_query.message.edit_text(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+
+
+@router.message(Command(commands='help'))
+async def help_message(message: Message):
+    await message.answer(MESSAGES['/help'], parse_mode='HTML')
 
 
 @router.callback_query(F.data.in_({'session', 'return_session', 'cancel_session'}))
