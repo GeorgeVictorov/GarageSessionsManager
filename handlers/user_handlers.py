@@ -2,13 +2,15 @@ import calendar
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
-from lexicon.lexicon import MESSAGES
-from config_data.sessions_config import TYPES
+from lexicon.lexicon import MESSAGES, INFO
 from services.services import SessionManager, parse_session_data
 from keyboards.keyboards import generate_confirm_session
 from keyboards.calendar_keyboard import generate_calendar
 from keyboards.types_keyboard import generate_types_duration
 from keyboards.hours_keyboard import generate_hours_keyboard
+from database.sessions_user import book_new_session, upcoming_sessions
+from config_data.sessions_config import TYPES
+from config_data.config import load_config
 
 router = Router()
 session = {}
@@ -36,6 +38,58 @@ async def new_session(message: Message):
     await message.answer(text='Choose a date:', reply_markup=generate_calendar())
 
 
+@router.message(Command(commands='upcoming'))
+async def upcoming(message: Message):
+    user_id = message.from_user.id
+    booked_sessions = upcoming_sessions(user_id)
+
+    if booked_sessions:
+        sessions_info = "\n".join([
+            f"Session ID: <b>{user_session['id']}</b>\n"
+            f"Start Time: <b>{user_session['session_start']}</b>\n"
+            f"Duration: <b>{user_session['duration']}</b> hours\n"
+            f"Session Type: <b>{user_session['type_desc']}</b>\n"
+            for user_session in booked_sessions
+        ])
+        response_message = MESSAGES['/upcoming'].format(sessions_info)
+    else:
+        response_message = "<b>You have no upcoming sessions.</b>"
+
+    await message.answer(response_message, parse_mode='HTML')
+
+
+@router.callback_query(F.data.in_({'session', 'return_session', 'cancel_session'}))
+async def session_navigation(callback_query: CallbackQuery):
+    action = callback_query.data
+    user_id = callback_query.from_user.id
+    username = callback_query.from_user.username
+
+    if action == 'return_session':
+        session_data = session_manager.get_session(user_id)
+        session_data['time'] = ''
+        session_manager.set_session(user_id, session_data)
+        await callback_query.message.edit_text(text=f'Choose time:')
+        await callback_query.message.edit_reply_markup(
+            reply_markup=generate_hours_keyboard(session_data['date'], session_data['duration']))
+
+    elif action == 'cancel_session':
+        session_manager.clear_session(user_id)
+        await callback_query.message.edit_text(text=INFO['cancel'], parse_mode='HTML')
+
+    elif action == 'session':
+        session_start, session_end, duration, session_type = parse_session_data(session_manager.get_session(user_id))
+        db_session_type = TYPES.get(session_type, '')
+        book_new_session(user_id, username, session_start, session_end, duration, db_session_type)
+        formatted_text = INFO['session_booked'].format(username, session_start, duration, session_type)
+        await callback_query.message.edit_text(text=formatted_text, parse_mode='HTML')
+        session_manager.clear_session(user_id)
+
+        admin_ids = load_config().tg_bot.admin_ids
+        for admin_id in admin_ids:
+            admin_message = INFO['session_admin_info'].format(username, session_start, duration, session_type)
+            await callback_query.bot.send_message(admin_id, admin_message)
+
+
 @router.callback_query(F.data.in_({'confirm_session', 'back_to_types'}))
 async def hours_navigation(callback_query: CallbackQuery):
     action = callback_query.data
@@ -43,21 +97,18 @@ async def hours_navigation(callback_query: CallbackQuery):
     username = callback_query.from_user.username
 
     if action == 'confirm_session' and session_manager.get_session(user_id)['time']:
-        session_date, duration, session_type = parse_session_data(session_manager.get_session(user_id))
-        formatted_text = (f"New session for <b>{username}</b>"
-                          f"\n\nSession Date: <b>{session_date}</b>"
-                          f"\nDuration: <b>{duration} hours</b>"
-                          f"\nSession Type: <b>{session_type}</b>")
+        session_date, _, duration, session_type = parse_session_data(session_manager.get_session(user_id))
+        formatted_text = INFO['session'].format(username, session_date, duration, session_type)
         await callback_query.message.edit_text(
             text=formatted_text, parse_mode='HTML')
         await callback_query.message.edit_reply_markup(reply_markup=generate_confirm_session())
 
     elif action == 'back_to_types':
         session_data = session_manager.get_session(user_id)
-        session_data['time'] = ''
+        session_data['duration'] = 3
         session_data['type'] = 'Nothing'
         session_manager.set_session(user_id, session_data)
-        await callback_query.message.edit_text(text='Choose time:',
+        await callback_query.message.edit_text(text='Choose type and duration::',
                                                reply_markup=generate_types_duration())
 
 

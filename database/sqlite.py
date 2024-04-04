@@ -75,18 +75,18 @@ class Database:
         try:
             cur = self.get_connection().cursor()
             cur.execute(f'''insert into {TYPES}
-                            select 1, "drummer", 150
+                            select 1, "Drummer", 150
                             where
                                 not exists (select 1 from {TYPES} where id = 1)
                             ''')
 
             cur.execute(f'''insert into {TYPES}
-                            select 2, "small_band", 200
+                            select 2, "Small band", 200
                             where
                                 not exists (select 1 from {TYPES} where id = 2)
                             ''')
             cur.execute(f'''insert into {TYPES}
-                            select 3, "norm_band", 300
+                            select 3, "Norm band", 300
                             where
                                 not exists (select 1 from {TYPES} where id = 3)
                             ''')
