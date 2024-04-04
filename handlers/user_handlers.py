@@ -1,34 +1,16 @@
 import calendar
-from datetime import datetime
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from lexicon.lexicon import MESSAGES
 from config_data.sessions_config import TYPES
-from services.services import SessionManager
+from services.services import SessionManager, parse_session_data
 from keyboards.keyboards import generate_calendar, generate_types_duration, generate_hours_keyboard, \
     generate_confirm_session
 
 router = Router()
 session = {}
 session_manager = SessionManager()
-
-
-def parse_datetime(date_time_str):
-    try:
-        return datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
-    except ValueError:
-        return None
-
-
-def parse_session_data(session_data: dict):
-    session_date_str = f'{session_data.get("date", "")} {session_data.get("time", "")}'
-    duration = session_data.get('duration', 0)
-    session_type = session_data.get('type', '')
-
-    session_date = parse_datetime(session_date_str)
-
-    return session_date, duration, session_type
 
 
 @router.message(Command(commands='start'))
