@@ -5,8 +5,10 @@ from aiogram.types import CallbackQuery, Message
 from lexicon.lexicon import MESSAGES
 from config_data.sessions_config import TYPES
 from services.services import SessionManager, parse_session_data
-from keyboards.keyboards import generate_calendar, generate_types_duration, generate_hours_keyboard, \
-    generate_confirm_session
+from keyboards.keyboards import generate_confirm_session
+from keyboards.calendar_keyboard import generate_calendar
+from keyboards.types_keyboard import generate_types_duration
+from keyboards.hours_keyboard import generate_hours_keyboard
 
 router = Router()
 session = {}
