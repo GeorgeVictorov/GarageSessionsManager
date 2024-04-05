@@ -18,11 +18,6 @@ async def admin_start(message: Message):
 
 @router.message(Command(commands='admin_upcoming'), IsAdmin())
 async def admin_upcoming(message: Message):
-    # config = load_config()
-    # # if message.from_user.id not in config.tg_bot.admin_ids:
-    #     await message.answer(MESSAGES['/admin_upcoming'])
-    #     return
-
     booked_sessions = admin_upcoming_sessions()
     response_message = format_sessions(booked_sessions)
     await message.answer(response_message, parse_mode='HTML')

@@ -10,7 +10,7 @@ def format_sessions(booked_sessions: List[Dict[str, str]]) -> str:
         format_sessions_info(user_session)
         for user_session in booked_sessions
     ])
-    return MESSAGES['/a_upcoming'].format(sessions_info)
+    return MESSAGES['/admin_upcoming'].format(sessions_info)
 
 
 def format_sessions_info(user_session: Dict[str, str]) -> str:

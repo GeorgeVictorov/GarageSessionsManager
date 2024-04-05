@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import List, Dict
 
 
 class SessionManager:
@@ -36,3 +37,14 @@ def parse_session_data(session_data: dict):
         session_end = None
 
     return session_date, session_end, duration, session_type
+
+
+def format_sessions_info(sessions: List[Dict[str, str]]) -> str:
+    return "\n".join([
+        f"Session ID: <b>{session['id']}</b>\n"
+        f"Start Time: <b>{session['session_start'].split()[0]} | "
+        f"{session['session_start'].split()[1][:5]}</b>\n"
+        f"Duration: <b>{session['duration']}</b> hours\n"
+        f"Session Type: <b>{session['type_desc']}</b>\n"
+        for session in sessions
+    ])

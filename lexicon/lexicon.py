@@ -4,7 +4,7 @@ MESSAGES: dict[str, str] = {
               '\n\nPress /upcoming to view upcoming sessions.',
     '/upcoming': '<b>Here are your upcoming sessions:</b>\n\n'
                  '{}',
-    '/a_upcoming': '<b>Here are all upcoming sessions:</b>\n\n'
+    '/admin_upcoming': '<b>Here are all upcoming sessions:</b>\n\n'
                    '{}',
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
     '/help': '<b>Welcome to Garage Sessions Manager.</b>'
@@ -17,12 +17,7 @@ MESSAGES: dict[str, str] = {
              '\n\nPress /start to begin.'
              '\n\nPress /new to book a new session.'
              '\n\nPress /upcoming to view sessions.'
-             '\n\nPress /cancel to cancel a session.',
-    '/admin': '<b>403 Forbidden</b>',
-    '/admin_upcoming': '<b>403 Forbidden</b>',
-    '/admin_cancel': '<b>403 Forbidden</b>',
-    '/admin_payment': '<b>403 Forbidden</b>',
-    '/admin_sessions': '<b>403 Forbidden</b>'
+             '\n\nPress /cancel to cancel a session.'
 }
 
 LEXICON_COMMANDS: dict[str, str] = {

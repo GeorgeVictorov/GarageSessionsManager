@@ -3,7 +3,7 @@ from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from lexicon.lexicon import MESSAGES, INFO
-from services.services import SessionManager, parse_session_data
+from services.services import SessionManager, parse_session_data, format_sessions_info
 from keyboards.keyboards import generate_confirm_session, generate_sessions_keyboard
 from keyboards.calendar_keyboard import generate_calendar
 from keyboards.types_keyboard import generate_types_duration
@@ -13,7 +13,6 @@ from config_data.sessions_config import TYPES
 from config_data.config import load_config
 
 router = Router()
-session = {}
 session_manager = SessionManager()
 
 
@@ -44,14 +43,7 @@ async def upcoming(message: Message):
     booked_sessions = upcoming_sessions(user_id)
 
     if booked_sessions:
-        sessions_info = "\n".join([
-            f"Session ID: <b>{user_session['id']}</b>\n"
-            f"Start Time: <b>{user_session['session_start'].split()[0]} | "
-            f"{user_session['session_start'].split()[1][:5]}</b>\n"
-            f"Duration: <b>{user_session['duration']}</b> hours\n"
-            f"Session Type: <b>{user_session['type_desc']}</b>\n"
-            for user_session in booked_sessions
-        ])
+        sessions_info = format_sessions_info(booked_sessions)
         response_message = MESSAGES['/upcoming'].format(sessions_info)
     else:
         response_message = "<b>You have no upcoming sessions.</b>"
