@@ -7,16 +7,15 @@ from services.admin import format_sessions
 from filters.admin import IsAdmin
 
 router = Router()
-admin_ids = IsAdmin()
 
 
-@router.message(Command(commands='admin'), admin_ids)
+@router.message(Command(commands='admin'), IsAdmin())
 async def admin_start(message: Message):
     username = message.from_user.username
     await message.answer(INFO['/admin'].format(username), parse_mode='HTML')
 
 
-@router.message(Command(commands='admin_upcoming'), admin_ids)
+@router.message(Command(commands='admin_upcoming'), IsAdmin())
 async def admin_upcoming(message: Message):
     booked_sessions = admin_upcoming_sessions()
     response_message = format_sessions(booked_sessions)
