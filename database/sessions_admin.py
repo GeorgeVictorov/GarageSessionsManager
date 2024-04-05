@@ -13,11 +13,12 @@ def admin_upcoming_sessions() -> list:
         cursor = conn.cursor()
         today = datetime.now().date()
         cursor.execute(f'''
-                    select s.id, s.session_start, s.duration, t.type_desc
+                    select s.id, s.user_username, s.session_start, s.duration, t.type_desc, 
+                    t.price * s.duration, is_payed
                     from {SESSIONS} s
                     inner join {TYPES} t on s.type = t.id
                     where s.session_start >= ? and  s.is_canceled = 0
-                    order by 2
+                    order by 3
                 ''', (today,))
         sessions = cursor.fetchall()
         cursor.close()
@@ -25,15 +26,18 @@ def admin_upcoming_sessions() -> list:
         for session in sessions:
             session_dict = {
                 'id': session[0],
-                'session_start': session[1],
-                'duration': session[2],
-                'type_desc': session[3]
+                'username': session[1],
+                'session_start': session[2],
+                'duration': session[3],
+                'type_desc': session[4],
+                'total_price': session[5],
+                'is_payed': session[6]
             }
             session_list.append(session_dict)
         logging.info('Successfully retrieved sessions info.')
         return session_list
     except Exception as e:
-        logging.error(f"An error occurred in upcoming_sessions function: {str(e)}.")
+        logging.error(f"An error occurred in admin_upcoming_sessions function: {str(e)}.")
 
 
 def admin_cancel_session(session_id: int):
