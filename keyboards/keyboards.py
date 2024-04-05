@@ -1,5 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database.sessions_user import upcoming_sessions
+from filters.callback_factory import CancelSessionCallback
 
 
 def generate_confirm_session() -> InlineKeyboardMarkup:
@@ -29,6 +30,15 @@ def generate_sessions_keyboard(user_id):
                 f"{user_session['duration']} hours | "
                 f"{user_session['type_desc']}"
             )
-            keyboard_markup.inline_keyboard.append([InlineKeyboardButton(text=session_info,
-                                                                         callback_data=f"cancel_session-{user_session['id']}")])
+            keyboard_markup.inline_keyboard.append([InlineKeyboardButton(
+                text=session_info,
+                callback_data=CancelSessionCallback(id=f'{user_session['id']}').pack())]
+            )
+
+    keyboard_markup.inline_keyboard.append([
+        InlineKeyboardButton(text='➖ Close️', callback_data='close_cancel'),
+    ])
+
     return keyboard_markup
+
+# callback_data = f"cancel_session-{user_session['id']}")]

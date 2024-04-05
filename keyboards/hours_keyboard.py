@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database.sessions_user import get_unavailable_times
 from datetimerange import DateTimeRange
+from filters.callback_factory import ChooseHourCallback
 
 
 def generate_hours_keyboard(selected_date: str, selected_duration: int) -> InlineKeyboardMarkup:
@@ -26,10 +27,13 @@ def generate_hours_keyboard(selected_date: str, selected_duration: int) -> Inlin
         proposed_session = DateTimeRange(session_start, session_end)
 
         if any(interval.is_intersection(proposed_session) for interval in unavailable_intervals):
-            row.append(InlineKeyboardButton(text="✖️", callback_data="unavailable"))
+            row.append(InlineKeyboardButton(text="✖️", callback_data="ignore"))
         else:
-            callback_data = f"hour-{session_start.strftime('%H:%M:%S')}"
-            row.append(InlineKeyboardButton(text=session_start.strftime('%H:%M'), callback_data=callback_data))
+            # callback_data = f"hour-{session_start.strftime('%H:%M:%S')}"
+            row.append(
+                InlineKeyboardButton(text=session_start.strftime('%H:%M'), callback_data=ChooseHourCallback(
+                    hour=f'{session_start.strftime('%H:%M:%S')}').pack()
+                                     ))
 
         if len(row) == 4:
             hours_markup.inline_keyboard.append(row)

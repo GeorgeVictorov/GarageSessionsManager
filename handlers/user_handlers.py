@@ -11,6 +11,7 @@ from keyboards.hours_keyboard import generate_hours_keyboard
 from database.sessions_user import book_new_session, upcoming_sessions, cancel_session
 from config_data.sessions_config import TYPES
 from config_data.config import load_config
+from filters.callback_factory import ChooseDateCallback, ChooseHourCallback, CancelSessionCallback
 
 router = Router()
 session_manager = SessionManager()
@@ -65,9 +66,10 @@ async def cancel(message: Message):
     await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
 
 
-@router.callback_query(F.data.startswith('cancel_session'))
-async def cancel_upcoming_sessions(callback_query: CallbackQuery):
-    action, session_id = callback_query.data.split('-')
+@router.callback_query(CancelSessionCallback.filter())
+async def cancel_upcoming_sessions(callback_query: CallbackQuery,
+                                   callback_data: CancelSessionCallback):
+    action, session_id = callback_data.pack().split('-')
     user_id = callback_query.from_user.id
     cancel_session(int(session_id))
 
@@ -81,6 +83,12 @@ async def cancel_upcoming_sessions(callback_query: CallbackQuery):
         response_message = "<b>You have no upcoming sessions.</b>"
 
     await callback_query.message.edit_text(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+
+
+@router.callback_query(F.data == 'close_cancel')
+async def close_cancel_upcoming_sessions(callback_query: CallbackQuery):
+    await callback_query.message.edit_text(text=INFO['close'],
+                                           parse_mode='HTML')
 
 
 @router.message(Command(commands='help'))
@@ -136,15 +144,16 @@ async def hours_navigation(callback_query: CallbackQuery):
     elif action == 'back_to_types':
         session_data = session_manager.get_session(user_id)
         session_data['duration'] = 3
-        session_data['type'] = 'Nothing'
+        session_data['type'] = 'no type'
         session_manager.set_session(user_id, session_data)
         await callback_query.message.edit_text(text='Choose type and duration::',
                                                reply_markup=generate_types_duration())
 
 
-@router.callback_query(F.data.startswith('hour'))
-async def hours_choose(callback_query: CallbackQuery):
-    action, hour = callback_query.data.split('-')
+@router.callback_query(ChooseHourCallback.filter())
+async def hours_choose(callback_query: CallbackQuery,
+                       callback_data: ChooseHourCallback):
+    action, hour = callback_data.pack().split('-')
     user_id = callback_query.from_user.id
 
     session_data = session_manager.get_session(user_id)
@@ -169,7 +178,7 @@ async def types_navigation(callback_query: CallbackQuery):
             reply_markup=generate_hours_keyboard(session_data['date'], session_data['duration']))
     elif action == 'return_types':
         session_data['date'] = ''
-        session_data['type'] = 'Nothing'
+        session_data['type'] = 'no type'
         session_manager.set_session(user_id, session_data)
         await callback_query.message.edit_text(text='Choose a date:', reply_markup=generate_calendar())
     elif action in TYPES:
@@ -226,10 +235,16 @@ async def calendar_confirm(callback_query: CallbackQuery):
         await callback_query.message.edit_text(text='Choose type and duration:', reply_markup=generate_types_duration())
 
 
-@router.callback_query(F.data.startswith('choose'))
-async def calendar_choose(callback_query: CallbackQuery):
-    data_parts = callback_query.data.split('-')
-    year, month, day = map(int, data_parts[1:])
+@router.callback_query(F.data == 'close_calendar')
+async def calendar_close(callback_query: CallbackQuery):
+    await callback_query.message.edit_text(text=INFO['close'],
+                                           parse_mode='HTML')
+
+
+@router.callback_query(ChooseDateCallback.filter())
+async def calendar_choose(callback_query: CallbackQuery,
+                          callback_data: ChooseDateCallback):
+    year, month, day = map(int, callback_data.pack().split('-')[1:])
 
     user_id = callback_query.from_user.id
     chosen_date = f'{year}-{month}-{day}'
@@ -241,3 +256,19 @@ async def calendar_choose(callback_query: CallbackQuery):
         chosen_date_message = f"Date: <b>{day:02d}</b> {calendar.month_name[month]}."
         await callback_query.message.edit_text(chosen_date_message, parse_mode='HTML',
                                                reply_markup=generate_calendar(year, month))
+
+# @router.callback_query(F.data.startswith('choose'))
+# async def calendar_choose(callback_query: CallbackQuery):
+#     data_parts = callback_query.data.split('-')
+#     year, month, day = map(int, data_parts[1:])
+#
+#     user_id = callback_query.from_user.id
+#     chosen_date = f'{year}-{month}-{day}'
+#
+#     session_data = session_manager.get_session(user_id)
+#     if chosen_date != session_data['date']:
+#         session_data['date'] = chosen_date
+#         session_manager.set_session(user_id, session_data)
+#         chosen_date_message = f"Date: <b>{day:02d}</b> {calendar.month_name[month]}."
+#         await callback_query.message.edit_text(chosen_date_message, parse_mode='HTML',
+#                                                reply_markup=generate_calendar(year, month))

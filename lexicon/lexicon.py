@@ -4,8 +4,13 @@ MESSAGES: dict[str, str] = {
               '\n\nPress /upcoming to view upcoming sessions.',
     '/upcoming': '<b>Here are your upcoming sessions:</b>\n\n'
                  '{}',
+    '/admin': '<b>Welcome, {}!</b>'
+              '\n\nPress /admin_upcoming to view upcoming sessions.'
+              '\n\nPress /admin_cancel to cancel any session.'
+              '\n\nPress /admin_payment to approve payment.'
+              '\n\nPress /admin_sessions to get all session history.',
     '/admin_upcoming': '<b>Here are all upcoming sessions:</b>\n\n'
-                   '{}',
+                       '{}',
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
     '/help': '<b>Welcome to Garage Sessions Manager.</b>'
              '\n\n<i>Garage Sessions Manager is a tool that facilitates booking sessions.'
@@ -44,9 +49,6 @@ INFO = {
                           "\n\nSession date: <b>{}</b>"
                           "\nDuration: <b>{} hours</b>"
                           "\nSession type: <b>{}</b>",
-    '/admin': '<b>Welcome, {}!</b>'
-              '\n\nPress /admin_upcoming to view upcoming sessions.'
-              '\n\nPress /admin_cancel to cancel any session.'
-              '\n\nPress /admin_payment to approve payment.'
-              '\n\nPress /admin_sessions to get all session history.'
+    'close': "<b>All in all, you're just another brick in the wall.</b>"
+             "\n\nPress /start to begin again."
 }
