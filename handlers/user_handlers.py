@@ -1,4 +1,5 @@
 import calendar
+from datetime import datetime
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
@@ -238,8 +239,15 @@ async def calendar_navigation(callback_query: CallbackQuery):
 async def calendar_confirm(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     session_data = session_manager.get_session(user_id)
+
     if session_data['date']:
-        await callback_query.message.edit_text(text='Choose type and duration:', reply_markup=generate_types_duration())
+        year, month, day = map(int, session_data['date'].split('-'))
+        session_date = datetime(year, month, day)
+        current_date = datetime.now().date()
+        
+        if session_date.date() >= current_date:
+            await callback_query.message.edit_text(text='Choose type and duration:',
+                                                   reply_markup=generate_types_duration())
 
 
 @router.callback_query(ChooseDateCallback.filter())
