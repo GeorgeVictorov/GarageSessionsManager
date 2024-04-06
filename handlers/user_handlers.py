@@ -244,7 +244,7 @@ async def calendar_confirm(callback_query: CallbackQuery):
         year, month, day = map(int, session_data['date'].split('-'))
         session_date = datetime(year, month, day)
         current_date = datetime.now().date()
-        
+
         if session_date.date() >= current_date:
             await callback_query.message.edit_text(text='Choose type and duration:',
                                                    reply_markup=generate_types_duration())
@@ -258,10 +258,15 @@ async def calendar_choose(callback_query: CallbackQuery,
     user_id = callback_query.from_user.id
     chosen_date = f'{year}-{month}-{day}'
 
-    session_data = session_manager.get_session(user_id)
-    if chosen_date != session_data['date']:
-        session_data['date'] = chosen_date
-        session_manager.set_session(user_id, session_data)
-        chosen_date_message = f"Date: <b>{day:02d}</b> {calendar.month_name[month]}."
-        await callback_query.message.edit_text(chosen_date_message, parse_mode='HTML',
-                                               reply_markup=generate_calendar(year, month))
+    if chosen_date:
+        year, month, day = map(int, chosen_date.split('-'))
+        session_date = datetime(year, month, day)
+        current_date = datetime.now().date()
+
+        session_data = session_manager.get_session(user_id)
+        if chosen_date != session_data['date'] and session_date.date() >= current_date:
+            session_data['date'] = chosen_date
+            session_manager.set_session(user_id, session_data)
+            chosen_date_message = f"Date: <b>{day:02d}</b> {calendar.month_name[month]}."
+            await callback_query.message.edit_text(chosen_date_message, parse_mode='HTML',
+                                                   reply_markup=generate_calendar(year, month))
