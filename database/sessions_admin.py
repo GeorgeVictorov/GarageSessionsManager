@@ -117,3 +117,23 @@ def admin_cancel_session(session_id: int):
         logging.info("Successfully canceled a session.")
     except Exception as e:
         logging.error(f"An error occurred in upcoming_sessions function: {str(e)}.")
+
+
+async def update_types_price(type_id: int, new_price: int):
+    database = Database()
+    conn = database.get_connection()
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute(f"update {TYPES} set price = ? where id = ?", (new_price, type_id))
+        conn.commit()
+
+        cursor.execute(f"select type_desc, price from {TYPES} where id = ?", (type_id,))
+        type_desc = cursor.fetchone()[0]
+
+        cursor.close()
+        logging.info(f"Price for session ID {type_id} updated successfully.")
+        return type_desc
+    except Exception as e:
+        logging.error(f"An error occurred while updating price: {str(e)}")
+        return None

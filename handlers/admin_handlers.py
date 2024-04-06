@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery, Message, BufferedInputFile
 from keyboards.keyboards import generate_admin_sessions, generate_admin_unpaid_sessions
 from lexicon.lexicon import MESSAGES, INFO
 from database.sessions_admin import admin_upcoming_sessions, admin_cancel_session, admin_canceled_info, \
-    admin_confirm_session_payment
+    admin_confirm_session_payment, update_types_price
 from database.select_sessions_data import get_sessions_history, history_to_csv, generate_filename
 from services.admin import format_sessions
 from filters.admin import IsAdmin
@@ -111,3 +111,24 @@ async def send_stats(message: Message):
         file_name = generate_filename(rows)
         await message.answer(text=MESSAGES['/admin_sessions'], parse_mode='HTML')
         await message.answer_document(BufferedInputFile(csv_data.encode(), filename=file_name))
+
+
+@router.message(Command('admin_update_price'), IsAdmin())
+async def update_price(message: Message):
+    await message.answer(MESSAGES['/admin_update_price'], parse_mode='HTML')
+
+
+@router.message(Command(commands='update_price'), IsAdmin())
+async def confirm_update_price(message: Message):
+    command_args = message.text.split()
+
+    if len(command_args) != 3:
+        await message.answer("Please provide the type ID and the new price.")
+        return
+
+    _, type_id, new_price = message.text.split()
+    type_desc = await update_types_price(type_id, new_price)
+    if type_desc is not None:
+        await message.answer(f"Price for type: <b>{type_desc}</b> updated to <b>{new_price}</b>.", parse_mode='HTML')
+    else:
+        await message.answer("An error occurred while updating price. Please try again later.")
