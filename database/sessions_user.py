@@ -49,7 +49,10 @@ def upcoming_sessions(user_id: int) -> list:
         today = datetime.now().date()
         cursor.execute(f'''
                     select s.id, s.session_start, s.duration, t.type_desc, 
-                    t.price * s.duration
+                    case
+                        when is_payed = 0 then t.price * s.duration
+                        else "Payed"
+                    end
                     from {SESSIONS} s
                     inner join {TYPES} t on s.type = t.id
                     where s.session_start >= ? and user_id = ? and s.is_canceled = 0

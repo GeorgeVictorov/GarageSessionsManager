@@ -1,12 +1,13 @@
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
-from keyboards.keyboards import generate_admin_sessions
+from keyboards.keyboards import generate_admin_sessions, generate_admin_unpaid_sessions
 from lexicon.lexicon import MESSAGES, INFO
-from database.sessions_admin import admin_upcoming_sessions, admin_cancel_session, admin_canceled_info
+from database.sessions_admin import admin_upcoming_sessions, admin_cancel_session, admin_canceled_info, \
+    admin_confirm_session_payment
 from services.admin import format_sessions
 from filters.admin import IsAdmin
-from filters.callback_factory import AdminCancelCallback
+from filters.callback_factory import AdminCancelCallback, AdminPaymentCallback
 from config_data.config import load_config
 
 router = Router()
@@ -26,7 +27,7 @@ async def admin_upcoming(message: Message):
 
 
 @router.message(Command(commands='admin_cancel'), IsAdmin())
-async def admin_start(message: Message):
+async def admin_cancel(message: Message):
     keyboard_markup = generate_admin_sessions()
 
     if keyboard_markup.inline_keyboard:
@@ -38,8 +39,8 @@ async def admin_start(message: Message):
 
 
 @router.callback_query(AdminCancelCallback.filter(), IsAdmin())
-async def cancel_upcoming_sessions(callback_query: CallbackQuery,
-                                   callback_data: AdminCancelCallback):
+async def admin_cancel_upcoming_sessions(callback_query: CallbackQuery,
+                                         callback_data: AdminCancelCallback):
     action, session_id = callback_data.pack().split('-')
     username = callback_query.from_user.username
     session_start, duration, type_desc = admin_canceled_info(session_id)
@@ -60,7 +61,42 @@ async def cancel_upcoming_sessions(callback_query: CallbackQuery,
     await callback_query.message.edit_text(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
 
 
-@router.callback_query(F.data == 'admin_close_cancel', IsAdmin())
-async def close_cancel_upcoming_sessions(callback_query: CallbackQuery):
+@router.callback_query(F.data == 'admin_close', IsAdmin())
+async def close_admin_cancel_upcoming_sessions(callback_query: CallbackQuery):
     await callback_query.message.edit_text(text=INFO['close'],
                                            parse_mode='HTML')
+
+
+@router.message(Command(commands='admin_payment'), IsAdmin())
+async def admin_payment(message: Message):
+    keyboard_markup = generate_admin_unpaid_sessions()
+
+    if keyboard_markup.inline_keyboard:
+        response_message = MESSAGES['/admin_payment']
+    else:
+        response_message = MESSAGES['/admin_no_payment']
+
+    await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+
+
+@router.callback_query(AdminPaymentCallback.filter(), IsAdmin())
+async def admin_confirm_payment(callback_query: CallbackQuery,
+                                callback_data: AdminPaymentCallback):
+    action, session_id = callback_data.pack().split('-')
+    username = callback_query.from_user.username
+    session_start, duration, type_desc = admin_canceled_info(session_id)
+
+    admin_confirm_session_payment(int(session_id))
+
+    keyboard_markup = generate_admin_unpaid_sessions()
+
+    for admin_id in load_config().tg_bot.admin_ids:
+        admin_message = INFO['session_admin_payment'].format(username, session_start, duration, type_desc)
+        await callback_query.bot.send_message(admin_id, admin_message, parse_mode='HTML')
+
+    if keyboard_markup.inline_keyboard:
+        response_message = MESSAGES['/admin_payment']
+    else:
+        response_message = MESSAGES['/admin_no_payment']
+
+    await callback_query.message.edit_text(response_message, parse_mode='HTML', reply_markup=keyboard_markup)

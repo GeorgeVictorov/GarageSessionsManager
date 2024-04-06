@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database.sessions_user import upcoming_sessions
-from database.sessions_admin import admin_upcoming_sessions
-from filters.callback_factory import CancelSessionCallback, AdminCancelCallback
+from database.sessions_admin import admin_upcoming_sessions, admin_unpaid_sessions
+from filters.callback_factory import CancelSessionCallback, AdminCancelCallback, AdminPaymentCallback
 
 
 def generate_confirm_session() -> InlineKeyboardMarkup:
@@ -59,7 +59,30 @@ def generate_admin_sessions():
             )
 
         keyboard_markup.inline_keyboard.append([
-            InlineKeyboardButton(text='➖ Close️', callback_data='admin_close_cancel'),
+            InlineKeyboardButton(text='➖ Close️', callback_data='admin_close'),
+        ])
+
+    return keyboard_markup
+
+
+def generate_admin_unpaid_sessions():
+    booked_sessions = admin_unpaid_sessions()
+    keyboard_markup = InlineKeyboardMarkup(inline_keyboard=[])
+    if booked_sessions:
+        for user_session in booked_sessions:
+            session_info = (
+                f"ID: {user_session['id']} | "
+                f"{user_session['session_start'].split()[0]} | "
+                f"{user_session['username']} | "
+                f"{user_session['total_price']} ₽"
+            )
+            keyboard_markup.inline_keyboard.append([InlineKeyboardButton(
+                text=session_info,
+                callback_data=AdminPaymentCallback(id=f'{user_session['id']}').pack())]
+            )
+
+        keyboard_markup.inline_keyboard.append([
+            InlineKeyboardButton(text='➖ Close️', callback_data='admin_close'),
         ])
 
     return keyboard_markup

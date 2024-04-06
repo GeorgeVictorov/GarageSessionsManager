@@ -16,6 +16,8 @@ MESSAGES: dict[str, str] = {
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
     '/admin_cancel': '<b>To cancel a sessions, simply click on it:</b>',
     '/cancel_success': 'Your session has been successfully canceled.',
+    '/admin_payment': '<b>To confirm session payment, simply click on it:</b>',
+    '/admin_no_payment': '<b>All sessions have been paid for.</b',
     '/help': '<b>Welcome to Garage Sessions Manager.</b>'
              '\n\n<i>Garage Sessions Manager is a tool that facilitates booking sessions.'
              '\n\nThe goal is to provide you with a seamless experience of managing your sessions.</i>'
@@ -57,6 +59,10 @@ INFO: dict[str, str] = {
                             "\n\nSession date: <b>{}</b>"
                             "\nDuration: <b>{} hours</b>"
                             "\nSession type: <b>{}</b>",
+    'session_admin_payment': "Payment confirmed for <b>{}</b> session"
+                             "\n\nSession date: <b>{}</b>"
+                             "\nDuration: <b>{} hours</b>"
+                             "\nSession type: <b>{}</b>",
     'close': "<b>All in all, you're just another brick in the wall.</b>"
              "\n\nPress /start to begin again."
 }
