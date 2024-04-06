@@ -123,7 +123,7 @@ async def confirm_update_price(message: Message):
     command_args = message.text.split()
 
     if len(command_args) != 3:
-        await message.answer("Please provide the type ID and the new price.")
+        await message.answer(MESSAGES['/admin_update_price_error'])
         return
 
     _, type_id, new_price = message.text.split()

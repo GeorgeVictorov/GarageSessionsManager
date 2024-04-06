@@ -11,7 +11,8 @@ MESSAGES: dict[str, str] = {
               '\n\nPress /admin_cancel to cancel any session.'
               '\n\nPress /admin_payment to approve payment.'
               '\n\nPress /admin_sessions to get all session history.'
-              '\n\nPress /admin_update_price to update session type price.',
+              '\n\nPress /admin_update_price to update session type price.'
+              '\n\nPress /admin_price to view type prices',
     '/admin_upcoming': '<b>Here are all upcoming sessions:</b>\n\n'
                        '{}',
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
@@ -21,12 +22,13 @@ MESSAGES: dict[str, str] = {
     '/admin_no_payment': '<b>All sessions have been paid for.</b>',
     '/admin_sessions': '<b>All session history (CSV file):</b>',
     '/admin_update_price': "<b>Please provide the type ID and the new price in the following format:</b>\n\n"
-                           "<i>update_price type_id new_price</i>\n\n"
-                           "For instance: <b>'update_price 2 350'</b>\n\n"
+                           "<i>/update_price type_id new_price</i>\n\n"
+                           "For instance: '/update_price 2 350'\n\n"
                            "<b>Session types and their corresponding type IDs:</b>\n\n"
                            "- Drummer - type ID: 1\n"
                            "- Small band - type ID: 2\n"
                            "- Norm band - type ID: 3",
+    '/admin_update_price_error': "Incorrect format. Please provide the type ID and the new price.",
     '/help': '<b>Welcome to Garage Sessions Manager.</b>'
              '\n\n<i>Garage Sessions Manager is a tool that facilitates booking sessions.'
              '\n\nThe goal is to provide you with a seamless experience of managing your sessions.</i>'
