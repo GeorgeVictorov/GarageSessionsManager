@@ -68,3 +68,16 @@ def generate_filename(data):
     except Exception as e:
         logging.error(f"Error generating filename for stats data: {e}.")
         return None
+
+
+def get_type_prices():
+    database = Database()
+    conn = database.get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f'select type_desc, price from {TYPES} order by id')
+        type_prices = cursor.fetchall()
+        logging.info("Retrieved prices from the database.")
+        return type_prices
+    except Exception as e:
+        logging.error(f"Error getting prices from the database: {e}.")

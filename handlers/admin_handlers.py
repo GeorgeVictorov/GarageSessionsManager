@@ -5,7 +5,7 @@ from keyboards.keyboards import generate_admin_sessions, generate_admin_unpaid_s
 from lexicon.lexicon import MESSAGES, INFO
 from database.sessions_admin import admin_upcoming_sessions, admin_cancel_session, admin_canceled_info, \
     admin_confirm_session_payment, update_types_price
-from database.select_sessions_data import get_sessions_history, history_to_csv, generate_filename
+from database.select_sessions_data import get_sessions_history, history_to_csv, generate_filename, get_type_prices
 from services.admin import format_sessions
 from filters.admin import IsAdmin
 from filters.callback_factory import AdminCancelCallback, AdminPaymentCallback
@@ -104,13 +104,23 @@ async def admin_confirm_payment(callback_query: CallbackQuery,
 
 
 @router.message(Command(commands='admin_sessions'), IsAdmin())
-async def send_stats(message: Message):
+async def send_session_history(message: Message):
     cols, rows = get_sessions_history()
     if cols:
         csv_data = history_to_csv(cols, rows)
         file_name = generate_filename(rows)
         await message.answer(text=MESSAGES['/admin_sessions'], parse_mode='HTML')
         await message.answer_document(BufferedInputFile(csv_data.encode(), filename=file_name))
+
+
+@router.message(Command(commands='admin_price'), IsAdmin())
+async def send_type_prices(message: Message):
+    type_prices = get_type_prices()
+    if type_prices:
+        price_message = "<b>Type Prices:</b>\n\n"
+        for type_desc, price in type_prices:
+            price_message += f"{type_desc}: {price}\n"
+        await message.answer(price_message, parse_mode='HTML')
 
 
 @router.message(Command('admin_update_price'), IsAdmin())
