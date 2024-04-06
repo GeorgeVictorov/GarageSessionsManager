@@ -13,3 +13,7 @@ class ChooseHourCallback(CallbackData, prefix='hour', sep='-'):
 
 class CancelSessionCallback(CallbackData, prefix='cancel_session', sep='-'):
     id: str
+
+
+class AdminCancelCallback(CallbackData, prefix='admin_cancel', sep='-'):
+    id: str

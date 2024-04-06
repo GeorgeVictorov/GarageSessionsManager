@@ -5,6 +5,7 @@ MESSAGES: dict[str, str] = {
     '/upcoming': '<b>Here are your upcoming sessions:</b>\n\n'
                  '{}',
     '/no_upcoming': "<b>You have no upcoming sessions.</b>",
+    '/admin_no_upcoming': "<b>There are no upcoming sessions.</b>",
     '/admin': '<b>Welcome, {}!</b>'
               '\n\nPress /admin_upcoming to view upcoming sessions.'
               '\n\nPress /admin_cancel to cancel any session.'
@@ -13,6 +14,7 @@ MESSAGES: dict[str, str] = {
     '/admin_upcoming': '<b>Here are all upcoming sessions:</b>\n\n'
                        '{}',
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
+    '/admin_cancel': '<b>To cancel a sessions, simply click on it:</b>',
     '/cancel_success': 'Your session has been successfully canceled.',
     '/help': '<b>Welcome to Garage Sessions Manager.</b>'
              '\n\n<i>Garage Sessions Manager is a tool that facilitates booking sessions.'
