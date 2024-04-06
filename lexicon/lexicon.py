@@ -17,7 +17,8 @@ MESSAGES: dict[str, str] = {
     '/admin_cancel': '<b>To cancel a sessions, simply click on it:</b>',
     '/cancel_success': 'Your session has been successfully canceled.',
     '/admin_payment': '<b>To confirm session payment, simply click on it:</b>',
-    '/admin_no_payment': '<b>All sessions have been paid for.</b',
+    '/admin_no_payment': '<b>All sessions have been paid for.</b>',
+    '/admin_sessions': '<b>All session history (CSV file):</b>',
     '/help': '<b>Welcome to Garage Sessions Manager.</b>'
              '\n\n<i>Garage Sessions Manager is a tool that facilitates booking sessions.'
              '\n\nThe goal is to provide you with a seamless experience of managing your sessions.</i>'

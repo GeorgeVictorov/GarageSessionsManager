@@ -1,3 +1,5 @@
+import hashlib
+import logging
 from datetime import datetime, timedelta
 from typing import List, Dict
 
@@ -49,3 +51,14 @@ def format_sessions_info(sessions: List[Dict[str, str]]) -> str:
         f"Price: <b>{session['price']}</b>\n"
         for session in sessions
     ])
+
+
+def hash_file_data(data: str) -> str:
+    try:
+        file_hash = hashlib.sha256()
+        for line in data:
+            file_hash.update(line.encode('utf-8'))
+        logging.info("Hashed file data successfully")
+        return file_hash.hexdigest()
+    except Exception as e:
+        logging.error(f"Error hashing file data: {e}")

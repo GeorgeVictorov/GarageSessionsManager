@@ -1,10 +1,11 @@
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, BufferedInputFile
 from keyboards.keyboards import generate_admin_sessions, generate_admin_unpaid_sessions
 from lexicon.lexicon import MESSAGES, INFO
 from database.sessions_admin import admin_upcoming_sessions, admin_cancel_session, admin_canceled_info, \
     admin_confirm_session_payment
+from database.select_sessions_data import get_sessions_history, history_to_csv, generate_filename
 from services.admin import format_sessions
 from filters.admin import IsAdmin
 from filters.callback_factory import AdminCancelCallback, AdminPaymentCallback
@@ -100,3 +101,13 @@ async def admin_confirm_payment(callback_query: CallbackQuery,
         response_message = MESSAGES['/admin_no_payment']
 
     await callback_query.message.edit_text(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+
+
+@router.message(Command(commands='admin_sessions'), IsAdmin())
+async def send_stats(message: Message):
+    cols, rows = get_sessions_history()
+    if cols:
+        csv_data = history_to_csv(cols, rows)
+        file_name = generate_filename(rows)
+        await message.answer(text=MESSAGES['/admin_sessions'], parse_mode='HTML')
+        await message.answer_document(BufferedInputFile(csv_data.encode(), filename=file_name))
