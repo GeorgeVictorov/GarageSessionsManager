@@ -65,15 +65,14 @@ def admin_unpaid_sessions() -> list:
     conn = database.get_connection()
     try:
         cursor = conn.cursor()
-        today = datetime.now().date()
         cursor.execute(f'''
                     select s.id, s.user_username, s.session_start, s.duration, t.type_desc, 
                     t.price * s.duration
                     from {SESSIONS} s
                     inner join {TYPES} t on s.type = t.id
-                    where s.session_start >= ? and  s.is_canceled = 0 and is_payed = 0
+                    where s.is_canceled = 0 and is_payed = 0
                     order by 3
-                ''', (today,))
+                ''')
         sessions = cursor.fetchall()
         cursor.close()
         session_list = []
