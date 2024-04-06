@@ -4,6 +4,7 @@ MESSAGES: dict[str, str] = {
               '\n\nPress /upcoming to view upcoming sessions.',
     '/upcoming': '<b>Here are your upcoming sessions:</b>\n\n'
                  '{}',
+    '/no_upcoming': "<b>You have no upcoming sessions.</b>",
     '/admin': '<b>Welcome, {}!</b>'
               '\n\nPress /admin_upcoming to view upcoming sessions.'
               '\n\nPress /admin_cancel to cancel any session.'
@@ -12,6 +13,7 @@ MESSAGES: dict[str, str] = {
     '/admin_upcoming': '<b>Here are all upcoming sessions:</b>\n\n'
                        '{}',
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
+    '/cancel_success': 'Your session has been successfully canceled.',
     '/help': '<b>Welcome to Garage Sessions Manager.</b>'
              '\n\n<i>Garage Sessions Manager is a tool that facilitates booking sessions.'
              '\n\nThe goal is to provide you with a seamless experience of managing your sessions.</i>'
@@ -33,7 +35,7 @@ LEXICON_COMMANDS: dict[str, str] = {
     '/help': 'Mayday, mayday. Man overboard again.'
 }
 
-INFO = {
+INFO: dict[str, str] = {
     'cancel': '<b>You have canceled your booking.</b>'
               '\n\nPress /new to book a new session.',
     'session': "New session for <b>{}</b>"
@@ -49,6 +51,10 @@ INFO = {
                           "\n\nSession date: <b>{}</b>"
                           "\nDuration: <b>{} hours</b>"
                           "\nSession type: <b>{}</b>",
+    'session_admin_cancel': "Session canceled for <b>{}</b>"
+                            "\n\nSession date: <b>{}</b>"
+                            "\nDuration: <b>{} hours</b>"
+                            "\nSession type: <b>{}</b>",
     'close': "<b>All in all, you're just another brick in the wall.</b>"
              "\n\nPress /start to begin again."
 }

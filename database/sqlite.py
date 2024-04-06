@@ -1,8 +1,5 @@
 import sqlite3
 import logging
-from logger.logger import setup_logger
-
-# from config_data.config import load_config
 
 DATABASE_FILE = 'database/garage.db'
 SESSIONS = 'garage_sessions'
@@ -75,7 +72,7 @@ class Database:
         try:
             cur = self.get_connection().cursor()
             cur.execute(f'''insert into {TYPES}
-                            select 1, "Drummer", 150
+                            select 1, "Drummer", 125
                             where
                                 not exists (select 1 from {TYPES} where id = 1)
                             ''')
@@ -98,24 +95,6 @@ class Database:
         except Exception as e:
             logging.error(f"Error setting default values in «{TYPES}»: {e}.")
 
-    def sessions_random_data(self):
-        try:
-            cur = self.get_connection().cursor()
-            cur.execute(f"""INSERT INTO {SESSIONS} (user_id, user_username, session_start, session_end, duration, type)
-                            VALUES
-                                (288878378, 'georgenegeorge', '2024-04-03 15:00:00', '2024-04-03 18:00:00', 3, 1),
-                                (288878378, 'georgenegeorge', '2024-04-03 19:00:00', '2024-04-03 20:00:00', 1, 2),
-                                (288878378, 'georgenegeorge', '2024-04-03 09:00:00', '2024-04-03 11:00:00', 2, 1),
-                                (288878378, 'georgenegeorge', '2024-04-03 11:00:00', '2024-04-03 14:00:00', 3, 3),
-                                (288878378, 'georgenegeorge', '2024-04-03 23:00:00', '2024-04-05 02:00:00', 3, 3);
-                                """)
-            self.db_connection.commit()
-            cur.close()
-            logging.info(f"Table: «{SESSIONS}» set with test values.")
-
-        except Exception as e:
-            logging.error(f"Error setting default values in «{SESSIONS}»: {e}.")
-
     def close_database(self):
         if self.db_connection:
             try:
@@ -125,18 +104,3 @@ class Database:
                 logging.error(f"Error closing database connection: {e}.")
         else:
             logging.warning("No open database connection to close or connection is already closed.")
-
-
-db_manager = Database()
-conn = db_manager.get_connection()
-db_manager.get_connection()
-# db_manager.create_tables()
-# db_manager.set_default_values()
-# db_manager.sessions_random_data()
-cur = conn.cursor()
-cur.execute(f'select * from {SESSIONS}')
-column_names = [column[0] for column in cur.description]
-print(' '.join(name.ljust(20) for name in column_names))
-for row in cur:
-    print(' '.join(str(item).ljust(20) for item in row))
-cur.close()

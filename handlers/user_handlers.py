@@ -9,6 +9,7 @@ from keyboards.calendar_keyboard import generate_calendar
 from keyboards.types_keyboard import generate_types_duration
 from keyboards.hours_keyboard import generate_hours_keyboard
 from database.sessions_user import book_new_session, upcoming_sessions, cancel_session
+from database.sessions_admin import admin_canceled_info
 from config_data.sessions_config import TYPES
 from config_data.config import load_config
 from filters.callback_factory import ChooseDateCallback, ChooseHourCallback, CancelSessionCallback
@@ -47,7 +48,7 @@ async def upcoming(message: Message):
         sessions_info = format_sessions_info(booked_sessions)
         response_message = MESSAGES['/upcoming'].format(sessions_info)
     else:
-        response_message = "<b>You have no upcoming sessions.</b>"
+        response_message = MESSAGES['/no_upcoming']
 
     await message.answer(response_message, parse_mode='HTML')
 
@@ -61,7 +62,7 @@ async def cancel(message: Message):
     if keyboard_markup.inline_keyboard:
         response_message = MESSAGES['/cancel']
     else:
-        response_message = "<b>You have no upcoming sessions.</b>"
+        response_message = MESSAGES['/no_upcoming']
 
     await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
 
@@ -71,16 +72,22 @@ async def cancel_upcoming_sessions(callback_query: CallbackQuery,
                                    callback_data: CancelSessionCallback):
     action, session_id = callback_data.pack().split('-')
     user_id = callback_query.from_user.id
+    username = callback_query.from_user.username
+    session_start, duration, type_desc = admin_canceled_info(session_id)
     cancel_session(int(session_id))
 
-    await callback_query.message.answer(f"Your session has been successfully canceled.")
+    await callback_query.message.answer(MESSAGES['/cancel_success'])
+
+    for admin_id in load_config().tg_bot.admin_ids:
+        admin_message = INFO['session_admin_cancel'].format(username, session_start, duration, type_desc)
+        await callback_query.bot.send_message(admin_id, admin_message, parse_mode='HTML')
 
     keyboard_markup = generate_sessions_keyboard(user_id)
 
     if keyboard_markup.inline_keyboard:
         response_message = MESSAGES['/cancel']
     else:
-        response_message = "<b>You have no upcoming sessions.</b>"
+        response_message = MESSAGES['/no_upcoming']
 
     await callback_query.message.edit_text(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
 
@@ -146,7 +153,7 @@ async def hours_navigation(callback_query: CallbackQuery):
         session_data['duration'] = 3
         session_data['type'] = 'no type'
         session_manager.set_session(user_id, session_data)
-        await callback_query.message.edit_text(text='Choose type and duration::',
+        await callback_query.message.edit_text(text='Choose type and duration:',
                                                reply_markup=generate_types_duration())
 
 
@@ -256,19 +263,3 @@ async def calendar_choose(callback_query: CallbackQuery,
         chosen_date_message = f"Date: <b>{day:02d}</b> {calendar.month_name[month]}."
         await callback_query.message.edit_text(chosen_date_message, parse_mode='HTML',
                                                reply_markup=generate_calendar(year, month))
-
-# @router.callback_query(F.data.startswith('choose'))
-# async def calendar_choose(callback_query: CallbackQuery):
-#     data_parts = callback_query.data.split('-')
-#     year, month, day = map(int, data_parts[1:])
-#
-#     user_id = callback_query.from_user.id
-#     chosen_date = f'{year}-{month}-{day}'
-#
-#     session_data = session_manager.get_session(user_id)
-#     if chosen_date != session_data['date']:
-#         session_data['date'] = chosen_date
-#         session_manager.set_session(user_id, session_data)
-#         chosen_date_message = f"Date: <b>{day:02d}</b> {calendar.month_name[month]}."
-#         await callback_query.message.edit_text(chosen_date_message, parse_mode='HTML',
-#                                                reply_markup=generate_calendar(year, month))

@@ -6,6 +6,26 @@ SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
 
 
+def admin_canceled_info(session_id: int) -> tuple:
+    database = Database()
+    conn = database.get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f'''
+                        select s.session_start, s.duration, t.type_desc
+                        from {SESSIONS} s
+                        inner join {TYPES} t on s.type = t.id
+                        where s.id = ?
+                    ''', (session_id,))
+        sessions_info = cursor.fetchone()
+        cursor.close()
+        logging.info('Successfully retrieved sessions info.')
+        return sessions_info
+
+    except Exception as e:
+        logging.error(f"An error occurred in admin_canceled_info function: {str(e)}.")
+
+
 def admin_upcoming_sessions() -> list:
     database = Database()
     conn = database.get_connection()
