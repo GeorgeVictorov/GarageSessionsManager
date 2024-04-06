@@ -46,5 +46,6 @@ def format_sessions_info(sessions: List[Dict[str, str]]) -> str:
         f"{session['session_start'].split()[1][:5]}</b>\n"
         f"Duration: <b>{session['duration']}</b> hours\n"
         f"Session Type: <b>{session['type_desc']}</b>\n"
+        f"Price: <b>{session['price']}</b>\n"
         for session in sessions
     ])

@@ -48,7 +48,8 @@ def upcoming_sessions(user_id: int) -> list:
         cursor = conn.cursor()
         today = datetime.now().date()
         cursor.execute(f'''
-                    select s.id, s.session_start, s.duration, t.type_desc
+                    select s.id, s.session_start, s.duration, t.type_desc, 
+                    t.price * s.duration
                     from {SESSIONS} s
                     inner join {TYPES} t on s.type = t.id
                     where s.session_start >= ? and user_id = ? and s.is_canceled = 0
@@ -62,7 +63,8 @@ def upcoming_sessions(user_id: int) -> list:
                 'id': session[0],
                 'session_start': session[1],
                 'duration': session[2],
-                'type_desc': session[3]
+                'type_desc': session[3],
+                'price': session[4]
             }
             session_list.append(session_dict)
         logging.info('Successfully retrieved sessions info.')
