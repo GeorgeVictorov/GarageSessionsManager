@@ -37,7 +37,7 @@ def generate_sessions_keyboard(user_id):
             )
 
         keyboard_markup.inline_keyboard.append([
-            InlineKeyboardButton(text='➖ Close️', callback_data='close_cancel'),
+            InlineKeyboardButton(text='➖ Close️', callback_data='close_user'),
         ])
 
     return keyboard_markup

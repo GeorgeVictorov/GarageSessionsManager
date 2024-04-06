@@ -92,8 +92,8 @@ async def cancel_upcoming_sessions(callback_query: CallbackQuery,
     await callback_query.message.edit_text(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
 
 
-@router.callback_query(F.data == 'close_cancel')
-async def close_cancel_upcoming_sessions(callback_query: CallbackQuery):
+@router.callback_query(F.data == 'close_user')
+async def close_menu(callback_query: CallbackQuery):
     await callback_query.message.edit_text(text=INFO['close'],
                                            parse_mode='HTML')
 
@@ -240,12 +240,6 @@ async def calendar_confirm(callback_query: CallbackQuery):
     session_data = session_manager.get_session(user_id)
     if session_data['date']:
         await callback_query.message.edit_text(text='Choose type and duration:', reply_markup=generate_types_duration())
-
-
-@router.callback_query(F.data == 'close_calendar')
-async def calendar_close(callback_query: CallbackQuery):
-    await callback_query.message.edit_text(text=INFO['close'],
-                                           parse_mode='HTML')
 
 
 @router.callback_query(ChooseDateCallback.filter())
