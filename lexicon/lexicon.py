@@ -12,7 +12,9 @@ MESSAGES: dict[str, str] = {
               '\n\nPress /admin_payment to approve payment.'
               '\n\nPress /admin_sessions to get all session history.'
               '\n\nPress /admin_update_price to update session type price.'
-              '\n\nPress /admin_price to view type prices',
+              '\n\nPress /admin_price to view type prices'
+              '\n\nPress /admin_users to view all users'
+              '\n\nPress /ban_user to ban or unban the user',
     '/admin_upcoming': '<b>Here are all upcoming sessions:</b>\n\n'
                        '{}',
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
@@ -40,6 +42,7 @@ MESSAGES: dict[str, str] = {
              '\n\nPress /new to book a new session.'
              '\n\nPress /upcoming to view sessions.'
              '\n\nPress /cancel to cancel a session.'
+             '\n\nPress /change_number to change your phone number'
 }
 
 LEXICON_COMMANDS: dict[str, str] = {

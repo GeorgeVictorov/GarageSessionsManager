@@ -5,7 +5,7 @@ from keyboards.keyboards import generate_admin_sessions, generate_admin_unpaid_s
 from lexicon.lexicon import MESSAGES, INFO
 from database.sessions_admin import admin_upcoming_sessions, admin_cancel_session, admin_canceled_info, \
     admin_confirm_session_payment, update_types_price
-from database.select_sessions_data import get_sessions_history, history_to_csv, generate_filename, get_type_prices
+from database.select_sessions_data import get_sessions_history, history_to_csv, generate_filename, get_type_prices, get_users
 from services.admin import format_sessions
 from filters.admin import IsAdmin
 from filters.callback_factory import AdminCancelCallback, AdminPaymentCallback
@@ -77,6 +77,16 @@ async def send_type_prices(message: Message):
         for type_desc, price in type_prices:
             price_message += f"{type_desc}: {price}\n"
         await message.answer(price_message, parse_mode='HTML')
+
+
+@router.message(Command(commands='admin_users'), IsAdmin())
+async def send_user_list(message: Message):
+    users = get_users()
+    if users:
+        user_message = "<b>Users:</b>\n\n"
+        for username, phone, ban in users:
+            user_message += f"{username} | {phone} | {ban}\n"
+        await message.answer(user_message, parse_mode='HTML')
 
 
 @router.message(Command('admin_update_price'), IsAdmin())

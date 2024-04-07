@@ -7,6 +7,7 @@ from services.services import hash_file_data
 
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
+USERS = 'garage_users'
 PAYMENTS = 'sessions_payment'
 
 
@@ -85,3 +86,22 @@ def get_type_prices():
         return type_prices
     except Exception as e:
         logging.error(f"Error getting prices from the database: {e}.")
+
+
+def get_users():
+    database = Database()
+    conn = database.get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f'''
+        select user_username, phone_number,
+        case
+            when is_banned = 1 then "User is banned"
+            else "Not banned"
+        end as ban 
+        from {USERS} order by id''')
+        type_prices = cursor.fetchall()
+        logging.info("Retrieved users from the database.")
+        return type_prices
+    except Exception as e:
+        logging.error(f"Error getting users from the database: {e}.")
