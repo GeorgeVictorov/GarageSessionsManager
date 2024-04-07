@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config_data.sessions_config import TYPES
+from config_data.types_config import TYPES
 
 
 def generate_types_duration(hours=3, disable_less=False) -> InlineKeyboardMarkup:
