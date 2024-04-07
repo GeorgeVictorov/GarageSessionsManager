@@ -142,3 +142,49 @@ async def confirm_update_price(message: Message):
         await message.answer(f"Price for type: <b>{type_desc}</b> updated to <b>{new_price}</b>.", parse_mode='HTML')
     else:
         await message.answer("An error occurred while updating price. Please try again later.")
+
+
+@router.callback_query(AdminCancelCallback.filter(), IsAdmin())
+async def admin_cancel_upcoming_sessions(callback_query: CallbackQuery,
+                                         callback_data: AdminCancelCallback):
+    action, session_id = callback_data.pack().split('-')
+    username = callback_query.from_user.username
+    session_start, duration, type_desc = admin_canceled_info(session_id)
+
+    admin_cancel_session(int(session_id))
+
+    keyboard_markup = generate_admin_sessions()
+
+    for admin_id in load_config().tg_bot.admin_ids:
+        admin_message = INFO['session_admin_cancel'].format(username, session_start, duration, type_desc)
+        await callback_query.bot.send_message(admin_id, admin_message, parse_mode='HTML')
+
+    if keyboard_markup.inline_keyboard:
+        response_message = MESSAGES['/admin_cancel']
+    else:
+        response_message = MESSAGES['/admin_no_upcoming']
+
+    await callback_query.message.edit_text(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+
+
+@router.callback_query(AdminPaymentCallback.filter(), IsAdmin())
+async def admin_confirm_payment(callback_query: CallbackQuery,
+                                callback_data: AdminPaymentCallback):
+    action, session_id = callback_data.pack().split('-')
+    username = callback_query.from_user.username
+    session_start, duration, type_desc = admin_canceled_info(session_id)
+
+    admin_confirm_session_payment(int(session_id))
+
+    keyboard_markup = generate_admin_unpaid_sessions()
+
+    for admin_id in load_config().tg_bot.admin_ids:
+        admin_message = INFO['session_admin_payment'].format(username, session_start, duration, type_desc)
+        await callback_query.bot.send_message(admin_id, admin_message, parse_mode='HTML')
+
+    if keyboard_markup.inline_keyboard:
+        response_message = MESSAGES['/admin_payment']
+    else:
+        response_message = MESSAGES['/admin_no_payment']
+
+    await callback_query.message.edit_text(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
