@@ -14,8 +14,10 @@ from database.sessions_admin import admin_canceled_info
 from config_data.sessions_config import TYPES
 from config_data.config import load_config
 from filters.callback_factory import ChooseDateCallback, ChooseHourCallback, CancelSessionCallback
+from middlewares.registration_middleware import RegistrationMiddleware
 
 router = Router()
+router.message.middleware(RegistrationMiddleware())
 session_manager = SessionManager()
 
 

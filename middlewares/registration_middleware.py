@@ -1,10 +1,12 @@
 from aiogram.types import Message
 from typing import Callable, Dict, Any, Awaitable
-from aiogram import BaseMiddleware
+from aiogram.dispatcher.middlewares.base import BaseMiddleware
 from database.sqlite import Database
 
 
 class RegistrationMiddleware(BaseMiddleware):
+    """Middleware to check if a user is registered in the database."""
+
     def __init__(self) -> None:
         pass
 
@@ -20,4 +22,4 @@ class RegistrationMiddleware(BaseMiddleware):
         if not is_registered:
             await event.answer("You are not registered. Please provide your phone number in the format +79265501355:")
             return False
-        return True
+        return await handler(event, data)

@@ -1,10 +1,18 @@
 import sqlite3
 import logging
+from cachetools import cached, TTLCache
 
 DATABASE_FILE = 'database/garage.db'
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
 USERS = 'garage_users'
+
+cache = TTLCache(maxsize=100, ttl=300)
+
+
+def update_cached_users():
+    cache.clear()
+    logging.info("Cached users cleared.")
 
 
 class Database:
@@ -67,6 +75,7 @@ class Database:
                                                             user_id int unique,
                                                             user_username text unique,
                                                             phone_number text,
+                                                            is_banned boolean default false,
                                                             foreign key (user_id) references {SESSIONS} (user_id),
                                                             foreign key (user_username) references {SESSIONS} (user_username)
                                                           )''')
@@ -104,6 +113,29 @@ class Database:
 
         except Exception as e:
             logging.error(f"Error setting default values in «{TYPES}»: {e}.")
+
+    @cached(cache=cache)
+    def check_user_registration(self, user_id):
+        try:
+            cur = self.get_connection().cursor()
+            cur.execute(f'select 1 from {USERS} where user_id = ? and is_banned = 0', (user_id,))
+            is_registered = cur.fetchone()
+            cur.close()
+            logging.info(f'Retrieved check_user_registration data.')
+            return is_registered
+        except Exception as e:
+            logging.error(f"Error getting data from «{USERS}»: {e}.")
+
+    def add_user(self, user_id, username, phone_number):
+        try:
+            cur = self.get_connection().cursor()
+            cur.execute(f'''insert into {USERS} (user_id, user_username, phone_number)
+                            values (?, ?, ?)''', (user_id, username, phone_number))
+            self.db_connection.commit()
+            cur.close()
+            logging.info(f'New user: {username} added to {USERS} table.')
+        except Exception as e:
+            logging.error(f"Error adding new user: {username} to «{USERS}»: {e}.")
 
     def close_database(self):
         if self.db_connection:

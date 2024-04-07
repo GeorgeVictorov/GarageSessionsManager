@@ -2,7 +2,7 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 from config_data.config import load_config
-from handlers import user_handlers, admin_handlers
+from handlers import user_handlers, admin_handlers, other_handlers
 from logger.logger import setup_logger
 from keyboards.main_menu import set_main_menu
 from database.sqlite import Database
@@ -37,6 +37,7 @@ async def main():
 
     dp.include_router(user_handlers.router)
     dp.include_router(admin_handlers.router)
+    dp.include_router(other_handlers.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

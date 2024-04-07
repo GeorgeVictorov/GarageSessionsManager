@@ -10,8 +10,10 @@ from services.admin import format_sessions
 from filters.admin import IsAdmin
 from filters.callback_factory import AdminCancelCallback, AdminPaymentCallback
 from config_data.config import load_config
+from middlewares.registration_middleware import RegistrationMiddleware
 
 router = Router()
+router.message.middleware(RegistrationMiddleware())
 
 
 @router.message(Command(commands='admin'), IsAdmin())
