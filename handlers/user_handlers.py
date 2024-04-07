@@ -15,6 +15,7 @@ from database.sessions_admin import admin_canceled_info
 from database.sqlite import update_cached_users
 from config_data.types_config import TYPES
 from config_data.config import load_config
+from config_data.commands import user_commands
 from filters.callback_factory import ChooseDateCallback, ChooseHourCallback, CancelSessionCallback
 from middlewares.registration_middleware import RegistrationMiddleware
 
@@ -23,9 +24,8 @@ router.message.middleware(RegistrationMiddleware())
 session_manager = SessionManager()
 
 
-@router.message(Command(commands=(
-        'start', 'new', 'upcoming', 'cancel', 'help', 'change_number', 'change')))
-async def user_commands(message: Message):
+@router.message(Command(commands=user_commands))
+async def user_commands_handler(message: Message):
     command = message.text.split()[0]
 
     if command == '/start':

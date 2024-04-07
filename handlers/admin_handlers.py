@@ -12,16 +12,15 @@ from services.admin import format_sessions
 from filters.admin import IsAdmin
 from filters.callback_factory import AdminCancelCallback, AdminPaymentCallback
 from config_data.config import load_config
+from config_data.commands import admin_commands
 from middlewares.registration_middleware import RegistrationMiddleware
 
 router = Router()
 router.message.middleware(RegistrationMiddleware())
 
 
-@router.message(IsAdmin(), Command(commands=(
-        'admin', 'admin_upcoming', 'admin_cancel', 'admin_payment', 'admin_sessions', 'admin_price', 'admin_users',
-        'admin_update_price', 'ban_user', 'update_price', 'ban')))
-async def admin_commands(message: Message):
+@router.message(IsAdmin(), Command(commands=admin_commands))
+async def admin_commands_handler(message: Message):
     command = message.text.split()[0]
 
     if command == '/admin':
