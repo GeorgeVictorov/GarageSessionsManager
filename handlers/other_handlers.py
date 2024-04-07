@@ -12,18 +12,18 @@ router = Router()
 async def process_phone_number(message: Message):
     db_manager = Database()
     user_id = message.from_user.id
-    if not db_manager.check_user_registration(user_id):
-        phone_number = message.text.strip()
-        if not re.match(r'(?:\+7|8)?[- ]?\(?(9\d{2})\)?[- ]?(\d{3})[- ]?(\d{2})[- ]?(\d{2})', phone_number):
-            await message.answer(
-                "<b>Invalid phone number format.</b>\n\n"
-                "Please provide your phone number in the following format:\n\n"
-                "For example: <b>+79261234455</b>\n\n"
-                "<i>By providing your phone number, you consent to the processing of your personal data.</i>\n\n"
-                "Please ensure that your phone number is correctly formatted to proceed.",
-                parse_mode='HTML')
-        else:
-            if admin_user_status(user_id) != 1:
+    if admin_user_status(user_id) != 1:
+        if not db_manager.check_user_registration(user_id):
+            phone_number = message.text.strip()
+            if not re.match(r'(?:\+7|8)?[- ]?\(?(9\d{2})\)?[- ]?(\d{3})[- ]?(\d{2})[- ]?(\d{2})', phone_number):
+                await message.answer(
+                    "<b>Invalid phone number format.</b>\n\n"
+                    "Please provide your phone number in the following format:\n\n"
+                    "For example: <b>+79261234455</b>\n\n"
+                    "<i>By providing your phone number, you consent to the processing of your personal data.</i>\n\n"
+                    "Please ensure that your phone number is correctly formatted to proceed.",
+                    parse_mode='HTML')
+            else:
                 if phone_number.startswith('8'):
                     phone_number = '+7' + phone_number[1:]
 
@@ -43,3 +43,5 @@ async def process_phone_number(message: Message):
                 for admin_id in load_config().tg_bot.admin_ids:
                     admin_message = f'New user: <b>{username}</b> has registered.'
                     await message.bot.send_message(admin_id, admin_message, parse_mode='HTML')
+    else:
+        await message.answer('<b>You are banned.</b>', parse_mode='HTML')

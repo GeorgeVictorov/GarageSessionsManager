@@ -7,6 +7,7 @@ from database.sessions_admin import admin_upcoming_sessions, admin_cancel_sessio
     admin_confirm_session_payment, update_types_price, admin_ban_or_unban_user
 from database.select_sessions_data import get_sessions_history, history_to_csv, generate_filename, get_type_prices, \
     get_users
+from database.sqlite import update_cached_users
 from services.admin import format_sessions
 from filters.admin import IsAdmin
 from filters.callback_factory import AdminCancelCallback, AdminPaymentCallback
@@ -126,14 +127,16 @@ async def ban_or_unban(message: Message):
         return
 
     _, user_id, status = message.text.split()
+    user_id = int(user_id)
     if user_id not in load_config().tg_bot.admin_ids:
-        status = admin_ban_or_unban_user(int(user_id), int(status))
+        status = admin_ban_or_unban_user(user_id, int(status))
         if status is not None:
+            update_cached_users()
             await message.answer(f"Status for: <b>{user_id}</b> has been changed.", parse_mode='HTML')
         else:
             await message.answer("An error occurred while changing the status.")
     else:
-        await message.answer("An error occurred while changing the status for admin.")
+        await message.answer("Impossible to ban an admin.")
 
 
 @router.callback_query(AdminCancelCallback.filter(), IsAdmin())
