@@ -28,5 +28,6 @@ async def process_phone_number(message: Message):
             update_cached_users()
             await message.answer(
                 f"Thank you for providing your phone number: \n\n<b>{formatted_phone_number}</b>\n\n"
-                f"By providing your phone number, you consent to the processing of your personal data.",
+                f"<i>By providing your phone number, you consent to the processing of your personal data.</i>\n\n"
+                f"Press /start to begin.",
                 parse_mode='HTML')
