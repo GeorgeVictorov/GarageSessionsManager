@@ -1,11 +1,19 @@
 import logging
 from datetime import datetime
+from cachetools import cached, TTLCache
 from database.sqlite import Database
 
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
 USERS = 'garage_users'
 PAYMENTS = 'sessions_payment'
+
+cache = TTLCache(maxsize=100, ttl=300)
+
+
+def clear_cache():
+    cache.clear()
+    logging.info("Cached users cleared.")
 
 
 def admin_canceled_info(session_id: int) -> tuple:
@@ -161,6 +169,7 @@ def admin_ban_or_unban_user(user_id: int, action: int):
         logging.error(f"An error occurred in admin_ban_or_unban_user function: {str(e)}.")
 
 
+@cached(cache=cache)
 def admin_user_status(user_id: int):
     database = Database()
     conn = database.get_connection()

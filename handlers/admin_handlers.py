@@ -8,6 +8,7 @@ from database.sessions_admin import admin_upcoming_sessions, admin_cancel_sessio
 from database.select_sessions_data import get_sessions_history, history_to_csv, generate_filename, get_type_prices, \
     get_users
 from database.sqlite import update_cached_users
+from database.sessions_admin import clear_cache
 from services.admin import format_sessions
 from filters.admin import IsAdmin
 from filters.callback_factory import AdminCancelCallback, AdminPaymentCallback
@@ -111,6 +112,7 @@ async def admin_commands_handler(message: Message):
             status = admin_ban_or_unban_user(user_id, int(status))
             if status is not None:
                 update_cached_users()
+                clear_cache()
                 await message.answer(f"Status for: <b>{user_id}</b> has been changed.", parse_mode='HTML')
             else:
                 await message.answer("An error occurred while changing the status.")

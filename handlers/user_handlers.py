@@ -13,6 +13,7 @@ from keyboards.hours_keyboard import generate_hours_keyboard
 from database.sessions_user import book_new_session, upcoming_sessions, cancel_session, change_user_number
 from database.sessions_admin import admin_canceled_info
 from database.sqlite import update_cached_users
+from database.sessions_admin import clear_cache
 from config_data.types_config import TYPES
 from config_data.config import load_config
 from config_data.commands import user_commands
@@ -99,101 +100,11 @@ async def user_commands_handler(message: Message):
                 user_phone = change_user_number(user_id, formatted_phone_number)
                 if user_phone is not None:
                     update_cached_users()
+                    clear_cache()
                     await message.answer(f"Phone number for <b>{username}</b> changed to <b>{phone_number}</b>.",
                                          parse_mode='HTML')
         else:
             await message.answer("An error occurred while changing the number.")
-
-
-#
-# @router.message(Command(commands='start'))
-# async def start(message: Message):
-#     await message.answer(MESSAGES['/start'], parse_mode='HTML')
-#
-#
-# @router.message(Command(commands='new'))
-# async def new_session(message: Message):
-#     user_id = message.from_user.id
-#     username = message.from_user.username
-#
-#     session_manager.set_session(user_id, {
-#         'username': username,
-#         'type': 'Nothing',
-#         'duration': 3,
-#         'date': '',
-#         'time': ''
-#     })
-#
-#     await message.answer(text='Choose a date:', reply_markup=generate_calendar())
-#
-#
-# @router.message(Command(commands='upcoming'))
-# async def upcoming(message: Message):
-#     user_id = message.from_user.id
-#     booked_sessions = upcoming_sessions(user_id)
-#
-#     if booked_sessions:
-#         sessions_info = format_sessions_info(booked_sessions)
-#         response_message = MESSAGES['/upcoming'].format(sessions_info)
-#     else:
-#         response_message = MESSAGES['/no_upcoming']
-#
-#     await message.answer(response_message, parse_mode='HTML')
-#
-#
-# @router.message(Command(commands='cancel'))
-# async def cancel(message: Message):
-#     user_id = message.from_user.id
-#
-#     keyboard_markup = generate_sessions_keyboard(user_id)
-#
-#     if keyboard_markup.inline_keyboard:
-#         response_message = MESSAGES['/cancel']
-#     else:
-#         response_message = MESSAGES['/no_upcoming']
-#
-#     await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
-#
-#
-# @router.message(Command(commands='help'))
-# async def help_message(message: Message):
-#     await message.answer(MESSAGES['/help'], parse_mode='HTML')
-#
-#
-# @router.message(Command(commands='change_number'))
-# async def help_message(message: Message):
-#     await message.answer(MESSAGES['/change_number'], parse_mode='HTML')
-#
-#
-# @router.message(Command(commands='change'))
-# async def change_number(message: Message):
-#     user_id = message.from_user.id
-#     username = message.from_user.username
-#     command_args = message.text.split()
-#
-#     if len(command_args) != 2:
-#         await message.answer(MESSAGES['/change_number_error'], parse_mode='HTML')
-#         return
-#
-#     _, phone_number = message.text.split()
-#
-#     if phone_number is not None:
-#         if not re.match(r'(?:\+7|8)?[- ]?\(?(9\d{2})\)?[- ]?(\d{3})[- ]?(\d{2})[- ]?(\d{2})', phone_number):
-#             await message.answer(MESSAGES['/change_number_error'], parse_mode='HTML')
-#         else:
-#             if phone_number.startswith('8'):
-#                 phone_number = '+7' + phone_number[1:]
-#
-#             formatted_phone_number = re.sub(r'^(\+\d)(\d{3})(\d{3})(\d{2})(\d{2})$',
-#                                             r'\1 (\2) \3-\4-\5',
-#                                             phone_number)
-#             user_phone = change_user_number(user_id, formatted_phone_number)
-#             if user_phone is not None:
-#                 update_cached_users()
-#                 await message.answer(f"Phone number for <b>{username}</b> changed to <b>{phone_number}</b>.",
-#                                      parse_mode='HTML')
-#     else:
-#         await message.answer("An error occurred while changing the number.")
 
 
 @router.callback_query(CancelSessionCallback.filter())
@@ -393,3 +304,93 @@ async def calendar_choose(callback_query: CallbackQuery,
             chosen_date_message = f"Date: <b>{day:02d}</b> {calendar.month_name[month]}."
             await callback_query.message.edit_text(chosen_date_message, parse_mode='HTML',
                                                    reply_markup=generate_calendar(year, month))
+
+#
+# @router.message(Command(commands='start'))
+# async def start(message: Message):
+#     await message.answer(MESSAGES['/start'], parse_mode='HTML')
+#
+#
+# @router.message(Command(commands='new'))
+# async def new_session(message: Message):
+#     user_id = message.from_user.id
+#     username = message.from_user.username
+#
+#     session_manager.set_session(user_id, {
+#         'username': username,
+#         'type': 'Nothing',
+#         'duration': 3,
+#         'date': '',
+#         'time': ''
+#     })
+#
+#     await message.answer(text='Choose a date:', reply_markup=generate_calendar())
+#
+#
+# @router.message(Command(commands='upcoming'))
+# async def upcoming(message: Message):
+#     user_id = message.from_user.id
+#     booked_sessions = upcoming_sessions(user_id)
+#
+#     if booked_sessions:
+#         sessions_info = format_sessions_info(booked_sessions)
+#         response_message = MESSAGES['/upcoming'].format(sessions_info)
+#     else:
+#         response_message = MESSAGES['/no_upcoming']
+#
+#     await message.answer(response_message, parse_mode='HTML')
+#
+#
+# @router.message(Command(commands='cancel'))
+# async def cancel(message: Message):
+#     user_id = message.from_user.id
+#
+#     keyboard_markup = generate_sessions_keyboard(user_id)
+#
+#     if keyboard_markup.inline_keyboard:
+#         response_message = MESSAGES['/cancel']
+#     else:
+#         response_message = MESSAGES['/no_upcoming']
+#
+#     await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+#
+#
+# @router.message(Command(commands='help'))
+# async def help_message(message: Message):
+#     await message.answer(MESSAGES['/help'], parse_mode='HTML')
+#
+#
+# @router.message(Command(commands='change_number'))
+# async def help_message(message: Message):
+#     await message.answer(MESSAGES['/change_number'], parse_mode='HTML')
+#
+#
+# @router.message(Command(commands='change'))
+# async def change_number(message: Message):
+#     user_id = message.from_user.id
+#     username = message.from_user.username
+#     command_args = message.text.split()
+#
+#     if len(command_args) != 2:
+#         await message.answer(MESSAGES['/change_number_error'], parse_mode='HTML')
+#         return
+#
+#     _, phone_number = message.text.split()
+#
+#     if phone_number is not None:
+#         if not re.match(r'(?:\+7|8)?[- ]?\(?(9\d{2})\)?[- ]?(\d{3})[- ]?(\d{2})[- ]?(\d{2})', phone_number):
+#             await message.answer(MESSAGES['/change_number_error'], parse_mode='HTML')
+#         else:
+#             if phone_number.startswith('8'):
+#                 phone_number = '+7' + phone_number[1:]
+#
+#             formatted_phone_number = re.sub(r'^(\+\d)(\d{3})(\d{3})(\d{2})(\d{2})$',
+#                                             r'\1 (\2) \3-\4-\5',
+#                                             phone_number)
+#             user_phone = change_user_number(user_id, formatted_phone_number)
+#             if user_phone is not None:
+#                 update_cached_users()
+#                 await message.answer(f"Phone number for <b>{username}</b> changed to <b>{phone_number}</b>.",
+#                                      parse_mode='HTML')
+#     else:
+#         await message.answer("An error occurred while changing the number.")

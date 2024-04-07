@@ -2,6 +2,7 @@ import re
 from aiogram import F, Router
 from aiogram.types import Message, ContentType
 from database.sqlite import Database, update_cached_users
+from database.sessions_admin import clear_cache
 from database.sessions_admin import admin_user_status
 from config_data.config import load_config
 
@@ -34,6 +35,7 @@ async def process_phone_number(message: Message):
                 username = message.from_user.username
                 db_manager.add_user(user_id, username, formatted_phone_number)
                 update_cached_users()
+                clear_cache()
                 await message.answer(
                     f"<b>Thank you for providing your phone number:</b>"
                     f"\n\n<b>{formatted_phone_number}</b>\n\n"
