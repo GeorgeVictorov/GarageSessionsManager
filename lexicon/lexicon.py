@@ -44,6 +44,15 @@ MESSAGES: dict[str, str] = {
                  "<b>User status:</b>\n\n"
                  "- Banned: 1\n"
                  "- Unbanned: 0",
+    '/phone_number': "<b>Invalid phone number format.</b>\n\n"
+                     "Please provide your phone number in the following format:\n\n"
+                     "For example: <b>+79261234455</b>\n\n"
+                     "<i>By providing your phone number, you consent to the processing of your personal data.</i>\n\n"
+                     "Please ensure that your phone number is correctly formatted to proceed.",
+    '/phone_success': "<b>Thank you for providing your phone number:</b>"
+                      "\n\n<b>{}</b>\n\n"
+                      "<i>By providing your phone number, you consent to the processing of your personal data.</i>\n\n"
+                      "Press /start to begin.",
     '/ban_user_error': "Incorrect format. Please provide user_id and status.",
     '/help': '<b>Welcome to Garage Sessions Manager.</b>'
              '\n\n<i>Garage Sessions Manager is a tool that facilitates booking sessions.'

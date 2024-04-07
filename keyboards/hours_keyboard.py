@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from database.sessions_user import get_unavailable_times
+from database.db_user import get_unavailable_times
 from datetimerange import DateTimeRange
 from filters.callback_factory import ChooseHourCallback
 

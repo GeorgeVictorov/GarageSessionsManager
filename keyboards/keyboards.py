@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from database.sessions_user import upcoming_sessions
-from database.sessions_admin import admin_upcoming_sessions, admin_unpaid_sessions
+from database.db_user import upcoming_sessions
+from database.db_admin import admin_upcoming_sessions, admin_unpaid_sessions
 from filters.callback_factory import CancelSessionCallback, AdminCancelCallback, AdminPaymentCallback
 
 
