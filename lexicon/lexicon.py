@@ -18,6 +18,13 @@ MESSAGES: dict[str, str] = {
     '/admin_upcoming': '<b>Here are all upcoming sessions:</b>\n\n'
                        '{}',
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
+    '/change_number': "<b>Please provide your new phone number in the following format:\n\n</b>"
+                      "<i>/change new_number</i>\n\n"
+                      "For example: /change +79261234455\n\n",
+    '/change_number_error': "<b>Invalid phone number format.</b>\n\n"
+                            "Please provide your phone number in the following format:\n\n"
+                            "<i>/change new_number</i>\n\n"
+                            "For example: /change +79261234455\n\n",
     '/admin_cancel': '<b>To cancel a sessions, simply click on it:</b>',
     '/cancel_success': 'Your session has been successfully canceled.',
     '/admin_payment': '<b>To confirm session payment, simply click on it:</b>',
@@ -31,6 +38,13 @@ MESSAGES: dict[str, str] = {
                            "- Small band - type ID: 2\n"
                            "- Norm band - type ID: 3",
     '/admin_update_price_error': "Incorrect format. Please provide the type ID and the new price.",
+    '/ban_user': "<b>To ban or unban a user, please provide user_id and status:</b>\n\n"
+                 "<i>/ban user_id status</i>\n\n"
+                 "For instance: '/ban 123456321 1'\n\n"
+                 "<b>User status:</b>\n\n"
+                 "- Banned: 1\n"
+                 "- Unbanned: 0",
+    '/ban_user_error': "Incorrect format. Please provide user_id and status.",
     '/help': '<b>Welcome to Garage Sessions Manager.</b>'
              '\n\n<i>Garage Sessions Manager is a tool that facilitates booking sessions.'
              '\n\nThe goal is to provide you with a seamless experience of managing your sessions.</i>'

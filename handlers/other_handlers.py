@@ -2,6 +2,7 @@ import re
 from aiogram import F, Router
 from aiogram.types import Message, ContentType
 from database.sqlite import Database, update_cached_users
+from database.sessions_admin import admin_user_status
 from config_data.config import load_config
 
 router = Router()
@@ -22,22 +23,23 @@ async def process_phone_number(message: Message):
                 "Please ensure that your phone number is correctly formatted to proceed.",
                 parse_mode='HTML')
         else:
-            if phone_number.startswith('8'):
-                phone_number = '+7' + phone_number[1:]
+            if admin_user_status(user_id) != 1:
+                if phone_number.startswith('8'):
+                    phone_number = '+7' + phone_number[1:]
 
-            formatted_phone_number = re.sub(r'^(\+\d{1})(\d{3})(\d{3})(\d{2})(\d{2})$',
-                                            r'\1 (\2) \3-\4-\5',
-                                            phone_number)
+                formatted_phone_number = re.sub(r'^(\+\d)(\d{3})(\d{3})(\d{2})(\d{2})$',
+                                                r'\1 (\2) \3-\4-\5',
+                                                phone_number)
 
-            username = message.from_user.username
-            db_manager.add_user(user_id, username, formatted_phone_number)
-            update_cached_users()
-            await message.answer(
-                f"<b>Thank you for providing your phone number:</b>"
-                f"\n\n<b>{formatted_phone_number}</b>\n\n"
-                f"<i>By providing your phone number, you consent to the processing of your personal data.</i>\n\n"
-                f"Press /start to begin.",
-                parse_mode='HTML')
-            for admin_id in load_config().tg_bot.admin_ids:
-                admin_message = f'New user: <b>{username}</b> has registered.'
-                await message.bot.send_message(admin_id, admin_message, parse_mode='HTML')
+                username = message.from_user.username
+                db_manager.add_user(user_id, username, formatted_phone_number)
+                update_cached_users()
+                await message.answer(
+                    f"<b>Thank you for providing your phone number:</b>"
+                    f"\n\n<b>{formatted_phone_number}</b>\n\n"
+                    f"<i>By providing your phone number, you consent to the processing of your personal data.</i>\n\n"
+                    f"Press /start to begin.",
+                    parse_mode='HTML')
+                for admin_id in load_config().tg_bot.admin_ids:
+                    admin_message = f'New user: <b>{username}</b> has registered.'
+                    await message.bot.send_message(admin_id, admin_message, parse_mode='HTML')

@@ -94,7 +94,7 @@ def get_users():
     try:
         cursor = conn.cursor()
         cursor.execute(f'''
-        select user_username, phone_number,
+        select user_id, user_username, phone_number,
         case
             when is_banned = 1 then "User is banned"
             else "Not banned"

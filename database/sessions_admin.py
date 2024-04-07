@@ -4,6 +4,7 @@ from database.sqlite import Database
 
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
+USERS = 'garage_users'
 PAYMENTS = 'sessions_payment'
 
 
@@ -142,3 +143,33 @@ def update_types_price(type_id: int, new_price: int):
     except Exception as e:
         logging.error(f"An error occurred while updating price: {str(e)}")
         return None
+
+
+def admin_ban_or_unban_user(user_id: int, action: int):
+    database = Database()
+    conn = database.get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f'update {USERS} set is_banned = ? where user_id = ?', (action, user_id,))
+        conn.commit()
+        cursor.execute(f'select is_banned from {USERS} where user_id = ?', (user_id,))
+        status = cursor.fetchone()[0]
+        cursor.close()
+        logging.info("Successfully updated user status a session.")
+        return status
+    except Exception as e:
+        logging.error(f"An error occurred in admin_ban_or_unban_user function: {str(e)}.")
+
+
+def admin_user_status(user_id: int):
+    database = Database()
+    conn = database.get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f'select is_banned from {USERS} where user_id = ?', (user_id,))
+        status = cursor.fetchone()[0]
+        cursor.close()
+        logging.info("Successfully fetched user status.")
+        return status
+    except Exception as e:
+        logging.error(f"An error occurred in admin_user_status function: {str(e)}.")

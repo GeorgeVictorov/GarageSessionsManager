@@ -4,6 +4,7 @@ from database.sqlite import Database
 
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
+USERS = 'garage_users'
 
 
 def get_unavailable_times(selected_date):
@@ -88,3 +89,26 @@ def cancel_session(session_id: int):
     except Exception as e:
         logging.error(f"An error occurred in upcoming_sessions function: {str(e)}.")
 
+
+def change_user_number(user_id: int, new_number: str):
+    database = Database()
+    conn = database.get_connection()
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute(f"update {USERS} set phone_number = ? where user_id = ?", (new_number, user_id))
+        conn.commit()
+
+        cursor.execute(f"select phone_number from {USERS} where user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        if row:
+            user_number = row[0]
+            logging.info(f"Changed phone number for user_id {user_id} successfully.")
+            return user_number
+        else:
+            logging.error(f"No user found with user_id {user_id}.")
+            return None
+    except Exception as e:
+        logging.error(f"An error occurred while changing the phone number: {str(e)}")
+        return None

@@ -1,3 +1,4 @@
+import re
 import calendar
 from datetime import datetime
 from aiogram import F, Router
@@ -9,8 +10,9 @@ from keyboards.keyboards import generate_confirm_session, generate_sessions_keyb
 from keyboards.calendar_keyboard import generate_calendar
 from keyboards.types_keyboard import generate_types_duration
 from keyboards.hours_keyboard import generate_hours_keyboard
-from database.sessions_user import book_new_session, upcoming_sessions, cancel_session
+from database.sessions_user import book_new_session, upcoming_sessions, cancel_session, change_user_number
 from database.sessions_admin import admin_canceled_info
+from database.sqlite import update_cached_users
 from config_data.sessions_config import TYPES
 from config_data.config import load_config
 from filters.callback_factory import ChooseDateCallback, ChooseHourCallback, CancelSessionCallback
@@ -104,6 +106,42 @@ async def close_menu(callback_query: CallbackQuery):
 @router.message(Command(commands='help'))
 async def help_message(message: Message):
     await message.answer(MESSAGES['/help'], parse_mode='HTML')
+
+
+@router.message(Command(commands='change_number'))
+async def help_message(message: Message):
+    await message.answer(MESSAGES['/change_number'], parse_mode='HTML')
+
+
+@router.message(Command(commands='change'))
+async def change_number(message: Message):
+    user_id = message.from_user.id
+    username = message.from_user.username
+    command_args = message.text.split()
+
+    if len(command_args) != 2:
+        await message.answer(MESSAGES['/change_number_error'], parse_mode='HTML')
+        return
+
+    _, phone_number = message.text.split()
+
+    if phone_number is not None:
+        if not re.match(r'(?:\+7|8)?[- ]?\(?(9\d{2})\)?[- ]?(\d{3})[- ]?(\d{2})[- ]?(\d{2})', phone_number):
+            await message.answer(MESSAGES['/change_number_error'], parse_mode='HTML')
+        else:
+            if phone_number.startswith('8'):
+                phone_number = '+7' + phone_number[1:]
+
+            formatted_phone_number = re.sub(r'^(\+\d)(\d{3})(\d{3})(\d{2})(\d{2})$',
+                                            r'\1 (\2) \3-\4-\5',
+                                            phone_number)
+            user_phone = change_user_number(user_id, formatted_phone_number)
+            if user_phone is not None:
+                update_cached_users()
+                await message.answer(f"Phone number for <b>{username}</b> changed to <b>{phone_number}</b>.",
+                                     parse_mode='HTML')
+    else:
+        await message.answer("An error occurred while changing the number.")
 
 
 @router.callback_query(F.data.in_({'session', 'return_session', 'cancel_session'}))
