@@ -16,7 +16,7 @@ from database.sqlite import update_cached_users
 from database.db_admin import clear_cache
 from config_data.types_config import TYPES
 from config_data.config import load_config
-from config_data.commands import user_commands
+from config_data.commands import USER_COMMANDS
 from filters.callback_factory import ChooseDateCallback, ChooseHourCallback, CancelSessionCallback
 from middlewares.registration_middleware import RegistrationMiddleware
 
@@ -25,7 +25,7 @@ router.message.middleware(RegistrationMiddleware())
 session_manager = SessionManager()
 
 
-@router.message(Command(commands=user_commands))
+@router.message(Command(commands=USER_COMMANDS))
 async def user_commands_handler(message: Message):
     command = message.text.split()[0]
     user_id = message.from_user.id
