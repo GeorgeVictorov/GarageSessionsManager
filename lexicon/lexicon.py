@@ -11,20 +11,21 @@ MESSAGES: dict[str, str] = {
               '\n\nPress /admin_cancel to cancel any session.'
               '\n\nPress /admin_payment to approve payment.'
               '\n\nPress /admin_sessions to get all session history.'
-              '\n\nPress /admin_price to view type prices'
-              '\n\nPress /admin_update_price to update session type price.'
+              '\n\nPress /admin_price to view type prices.'
+              '\n\nPress /update_price to update session type price.'
               '\n\nPress /admin_users to view all users.'
-              '\n\nPress /ban_user to ban or unban the user.',
+              '\n\nPress /ban_user to ban or unban the user.'
+              '\n\nPress /send_message to send a message to all users.',
     '/admin_upcoming': '<b>Here are all upcoming sessions:</b>\n\n'
                        '{}',
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
     '/change_number': "<b>Please provide your new phone number in the following format:\n\n</b>"
                       "<i>/change new_number</i>\n\n"
-                      "For example: /change +79261234455\n\n",
+                      "For example: «/change +79261234455»\n\n",
     '/change_number_error': "<b>Invalid phone number format.</b>\n\n"
                             "Please provide your phone number in the following format:\n\n"
                             "<i>/change new_number</i>\n\n"
-                            "For example: /change +79261234455\n\n",
+                            "For example: «/change +79261234455»\n\n",
     '/admin_cancel': '<b>To cancel a sessions, simply click on it:</b>',
     '/cancel_success': 'Your session has been successfully canceled.',
     '/admin_payment': '<b>To confirm session payment, simply click on it:</b>',
@@ -32,15 +33,15 @@ MESSAGES: dict[str, str] = {
     '/admin_sessions': '<b>All session history (CSV file):</b>',
     '/admin_update_price': "<b>Please provide the type ID and the new price in the following format:</b>\n\n"
                            "<i>/update_price type_id new_price</i>\n\n"
-                           "For instance: '/update_price 2 350'\n\n"
+                           "For instance: /update_price 2 350\n\n"
                            "<b>Session types and their corresponding type IDs:</b>\n\n"
                            "- Drummer - type ID: 1\n"
                            "- Small band - type ID: 2\n"
                            "- Norm band - type ID: 3",
     '/admin_update_price_error': "Incorrect format. Please provide the type ID and the new price.",
     '/ban_user': "<b>To ban or unban a user, please provide user_id and status:</b>\n\n"
-                 "<i>/ban user_id status</i>\n\n"
-                 "For instance: '/ban 123456321 1'\n\n"
+                 "<i>/ban_user user_id status</i>\n\n"
+                 "For instance: /ban_user 123456321 1\n\n"
                  "<b>User status:</b>\n\n"
                  "- Banned: 1\n"
                  "- Unbanned: 0",
@@ -54,6 +55,8 @@ MESSAGES: dict[str, str] = {
                       "<i>By providing your phone number, you consent to the processing of your personal data.</i>\n\n"
                       "Press /start to begin.",
     '/ban_user_error': "Incorrect format. Please provide user_id and status.",
+    '/send_message': "<b>Please provide a message to all users in the following format:</b>\n\n"
+                     "<i>/send_message your message</i>\n\n",
     '/help': '<b>Welcome to Garage Sessions Manager.</b>'
              '\n\n<i>Garage Sessions Manager is a tool that facilitates booking sessions.'
              '\n\nThe goal is to provide you with a seamless experience of managing your sessions.</i>'

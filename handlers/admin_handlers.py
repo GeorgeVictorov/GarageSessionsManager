@@ -78,14 +78,11 @@ async def admin_commands_handler(message: Message):
                 user_message += f"{phone} | {ban}\n\n"
             await message.answer(user_message, parse_mode='HTML')
 
-    elif command == '/admin_update_price':
-        await message.answer(MESSAGES['/admin_update_price'], parse_mode='HTML')
-
     elif command == '/update_price':
         command_args = message.text.split()
 
         if len(command_args) != 3:
-            await message.answer(MESSAGES['/admin_update_price_error'])
+            await message.answer(MESSAGES['/admin_update_price'], parse_mode='HTML')
             return
 
         _, type_id, new_price = message.text.split()
@@ -97,13 +94,10 @@ async def admin_commands_handler(message: Message):
             await message.answer("An error occurred while updating price. Please try again later.")
 
     elif command == '/ban_user':
-        await message.answer(MESSAGES['/ban_user'], parse_mode='HTML')
-
-    elif command == '/ban':
         command_args = message.text.split()
 
         if len(command_args) != 3:
-            await message.answer(MESSAGES['/ban_user_error'])
+            await message.answer(MESSAGES['/ban_user'], parse_mode='HTML')
             return
 
         _, user_id, status = message.text.split()
@@ -117,28 +111,22 @@ async def admin_commands_handler(message: Message):
             else:
                 await message.answer("An error occurred while changing the status.")
         else:
-            await message.answer("Impossible to ban an admin.")
+            await message.answer("<b>Impossible to ban an admin.</b>", parse_mode='HTML')
 
     elif command == '/send_message':
         command_args = message.text.split(maxsplit=1)
 
         if len(command_args) != 2:
-            await message.answer("Please provide the message.")
+            await message.answer(MESSAGES['/send_message'], parse_mode='HTML')
             return
 
-        try:
-            text = command_args[1]
+        text = command_args[1]
 
-            users = get_users()
-            print(users)
-            if users:
-                for user_id, _, _, _ in users:
-                    await message.bot.send_message(user_id, text)
-
-            await message.answer("Message sent to all users.")
-
-        except ValueError:
-            await message.answer("Invalid command format.")
+        users = get_users()
+        if users:
+            for user_id, _, _, _ in users:
+                await message.bot.send_message(user_id, text)
+        await message.answer("Message sent to all users.")
 
 
 @router.callback_query(F.data == 'admin_close', IsAdmin())
