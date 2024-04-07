@@ -119,6 +119,27 @@ async def admin_commands_handler(message: Message):
         else:
             await message.answer("Impossible to ban an admin.")
 
+    elif command == '/send_message':
+        command_args = message.text.split(maxsplit=1)
+
+        if len(command_args) != 2:
+            await message.answer("Please provide the message.")
+            return
+
+        try:
+            text = command_args[1]
+
+            users = get_users()
+            print(users)
+            if users:
+                for user_id, _, _, _ in users:
+                    await message.bot.send_message(user_id, text)
+
+            await message.answer("Message sent to all users.")
+
+        except ValueError:
+            await message.answer("Invalid command format.")
+
 
 @router.callback_query(F.data == 'admin_close', IsAdmin())
 async def close_admin_cancel_upcoming_sessions(callback_query: CallbackQuery):
