@@ -7,6 +7,7 @@ from services.services import hash_file_data
 
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
+PAYMENTS = 'sessions_payment'
 
 
 def get_sessions_history():
@@ -22,15 +23,18 @@ def get_sessions_history():
             sessions.session_end as "End time",
             types.type_desc as "Type",
             case
-                when is_payed = 1 then sessions.duration * types.price
+                when is_payed = 1 then "Payed"
                 else "Not payed"
             end as "Payment",
             case
                 when sessions.is_canceled = 1 then "Canceled"
-                else ""
-            end as "Status"
+                else "OK"
+            end as "Status",
+            payments.total_price as "Payed amount",
+            payments.payed_on as "Payment date"
         from {SESSIONS} sessions
         inner join {TYPES} types on sessions.type = types.id
+        left outer join {PAYMENTS} payments on sessions.id = payments.session_id
         order by 3''')
         rows = cursor.fetchall()
         cols = [description[0] for description in cursor.description]

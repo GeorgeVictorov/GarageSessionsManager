@@ -4,6 +4,7 @@ from database.sqlite import Database
 
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
+PAYMENTS = 'sessions_payment'
 
 
 def admin_canceled_info(session_id: int) -> tuple:
@@ -98,6 +99,11 @@ def admin_confirm_session_payment(session_id: int):
     try:
         cursor = conn.cursor()
         cursor.execute(f'update {SESSIONS} set is_payed = 1 where id = ?', (session_id,))
+        cursor.execute(f'''
+                    insert into {PAYMENTS} (session_id, total_price)
+                    select ?, type.price * session.duration
+                    from {SESSIONS} session
+                    inner join {TYPES} type on session.type = type.id''', (session_id,))
         conn.commit()
         cursor.close()
         logging.info("Payment confirmed.")

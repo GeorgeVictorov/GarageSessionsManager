@@ -6,6 +6,7 @@ DATABASE_FILE = 'database/garage.db'
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
 USERS = 'garage_users'
+PAYMENTS = 'sessions_payment'
 
 cache = TTLCache(maxsize=100, ttl=300)
 
@@ -71,18 +72,25 @@ class Database:
                                               )''')
 
             cur.execute(f'''create table if not exists {USERS} (
-                                                            id serial primary key,
-                                                            user_id int unique,
-                                                            user_username text unique,
-                                                            phone_number text,
-                                                            is_banned boolean default false,
-                                                            foreign key (user_id) references {SESSIONS} (user_id),
-                                                            foreign key (user_username) references {SESSIONS} (user_username)
+                                                id serial primary key,
+                                                user_id int unique,
+                                                user_username text unique,
+                                                phone_number text,
+                                                is_banned boolean default false,
+                                                foreign key (user_id) references {SESSIONS} (user_id),
+                                                foreign key (user_username) references {SESSIONS} (user_username)
                                                           )''')
+            cur.execute(f'''create table if not exists {PAYMENTS} (
+                                                payment_id integer primary key,
+                                                session_id int,
+                                                total_price int,
+                                                payed_on datetime default current_timestamp,
+                                                foreign key (session_id) references {SESSIONS} (id)
+                                                                      )''')
 
             self.db_connection.commit()
             cur.close()
-            logging.info(f"Database tables: «{SESSIONS}», «{TYPES}» and {USERS} created or verified.")
+            logging.info(f"Database tables: «{SESSIONS}», «{TYPES}», {USERS} and {PAYMENTS} created or verified.")
 
         except Exception as e:
             logging.error(f"Error initializing database: {e}.")
