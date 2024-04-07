@@ -4,6 +4,7 @@ import logging
 DATABASE_FILE = 'database/garage.db'
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
+USERS = 'garage_users'
 
 
 class Database:
@@ -61,9 +62,18 @@ class Database:
                                                 foreign key (id) references {SESSIONS} (type)
                                               )''')
 
+            cur.execute(f'''create table if not exists {USERS} (
+                                                            id serial primary key,
+                                                            user_id int unique,
+                                                            user_username text unique,
+                                                            phone_number text,
+                                                            foreign key (user_id) references {SESSIONS} (user_id),
+                                                            foreign key (user_username) references {SESSIONS} (user_username)
+                                                          )''')
+
             self.db_connection.commit()
             cur.close()
-            logging.info(f"Database tables: «{SESSIONS}», «{TYPES}» created or verified.")
+            logging.info(f"Database tables: «{SESSIONS}», «{TYPES}» and {USERS} created or verified.")
 
         except Exception as e:
             logging.error(f"Error initializing database: {e}.")
