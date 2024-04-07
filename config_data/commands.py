@@ -1,5 +1,5 @@
 user_commands = (
-    'start', 'new', 'upcoming', 'cancel', 'help', 'change_number', 'change'
+    'start', 'new', 'upcoming', 'cancel', 'help', 'change_number'
 )
 
 admin_commands = (

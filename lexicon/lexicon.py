@@ -20,12 +20,12 @@ MESSAGES: dict[str, str] = {
                        '{}',
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
     '/change_number': "<b>Please provide your new phone number in the following format:\n\n</b>"
-                      "<i>/change new_number</i>\n\n"
-                      "For example: «/change +79261234455»\n\n",
+                      "<i>/change_number new_number</i>\n\n"
+                      "For example: /change_number +79261234455\n\n",
     '/change_number_error': "<b>Invalid phone number format.</b>\n\n"
                             "Please provide your phone number in the following format:\n\n"
-                            "<i>/change new_number</i>\n\n"
-                            "For example: «/change +79261234455»\n\n",
+                            "<i>/change_number new_number</i>\n\n"
+                            "For example: /change_number +79261234455\n\n",
     '/admin_cancel': '<b>To cancel a sessions, simply click on it:</b>',
     '/cancel_success': 'Your session has been successfully canceled.',
     '/admin_payment': '<b>To confirm session payment, simply click on it:</b>',
@@ -68,7 +68,7 @@ MESSAGES: dict[str, str] = {
              '\n\nPress /new to book a new session.'
              '\n\nPress /upcoming to view sessions.'
              '\n\nPress /cancel to cancel a session.'
-             '\n\nPress /change_number to change your phone number'
+             '\n\nPress /change_number to change your phone number.'
 }
 
 LEXICON_COMMANDS: dict[str, str] = {

@@ -72,14 +72,11 @@ async def user_commands_handler(message: Message):
         await message.answer(MESSAGES['/help'], parse_mode='HTML')
 
     elif command == '/change_number':
-        await message.answer(MESSAGES['/change_number'], parse_mode='HTML')
-
-    elif command == '/change':
         username = message.from_user.username
         command_args = message.text.split()
 
         if len(command_args) != 2:
-            await message.answer(MESSAGES['/change_number_error'], parse_mode='HTML')
+            await message.answer(MESSAGES['/change_number'], parse_mode='HTML')
             return
 
         _, phone_number = message.text.split()
