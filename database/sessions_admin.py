@@ -124,7 +124,7 @@ def admin_cancel_session(session_id: int):
         logging.error(f"An error occurred in upcoming_sessions function: {str(e)}.")
 
 
-async def update_types_price(type_id: int, new_price: int):
+def update_types_price(type_id: int, new_price: int):
     database = Database()
     conn = database.get_connection()
     try:

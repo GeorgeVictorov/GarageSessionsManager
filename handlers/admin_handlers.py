@@ -5,7 +5,8 @@ from keyboards.keyboards import generate_admin_sessions, generate_admin_unpaid_s
 from lexicon.lexicon import MESSAGES, INFO
 from database.sessions_admin import admin_upcoming_sessions, admin_cancel_session, admin_canceled_info, \
     admin_confirm_session_payment, update_types_price
-from database.select_sessions_data import get_sessions_history, history_to_csv, generate_filename, get_type_prices, get_users
+from database.select_sessions_data import get_sessions_history, history_to_csv, generate_filename, get_type_prices, \
+    get_users
 from services.admin import format_sessions
 from filters.admin import IsAdmin
 from filters.callback_factory import AdminCancelCallback, AdminPaymentCallback
@@ -103,7 +104,7 @@ async def confirm_update_price(message: Message):
         return
 
     _, type_id, new_price = message.text.split()
-    type_desc = await update_types_price(type_id, new_price)
+    type_desc = update_types_price(type_id, new_price)
     if type_desc is not None:
         await message.answer(f"Price for type: <b>{type_desc}</b> updated to <b>{new_price}</b>.", parse_mode='HTML')
     else:

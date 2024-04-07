@@ -87,3 +87,4 @@ def cancel_session(session_id: int):
         logging.info("Successfully canceled a session.")
     except Exception as e:
         logging.error(f"An error occurred in upcoming_sessions function: {str(e)}.")
+
