@@ -2,6 +2,7 @@ import re
 from aiogram import F, Router
 from aiogram.types import Message, ContentType
 from database.sqlite import Database, update_cached_users
+from config_data.config import load_config
 
 router = Router()
 
@@ -37,3 +38,6 @@ async def process_phone_number(message: Message):
                 f"<i>By providing your phone number, you consent to the processing of your personal data.</i>\n\n"
                 f"Press /start to begin.",
                 parse_mode='HTML')
+            for admin_id in load_config().tg_bot.admin_ids:
+                admin_message = f'New user: <b>{username}</b> has registered.'
+                await message.bot.send_message(admin_id, admin_message, parse_mode='HTML')
