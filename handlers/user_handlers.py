@@ -28,12 +28,12 @@ session_manager = SessionManager()
 @router.message(Command(commands=user_commands))
 async def user_commands_handler(message: Message):
     command = message.text.split()[0]
+    user_id = message.from_user.id
 
     if command == '/start':
         await message.answer(MESSAGES['/start'], parse_mode='HTML')
 
     elif command == '/new':
-        user_id = message.from_user.id
         username = message.from_user.username
 
         session_manager.set_session(user_id, {
@@ -47,7 +47,6 @@ async def user_commands_handler(message: Message):
         await message.answer(text='Choose a date:', reply_markup=generate_calendar())
 
     elif command == '/upcoming':
-        user_id = message.from_user.id
         booked_sessions = upcoming_sessions(user_id)
 
         if booked_sessions:
@@ -59,7 +58,6 @@ async def user_commands_handler(message: Message):
         await message.answer(response_message, parse_mode='HTML')
 
     elif command == '/cancel':
-        user_id = message.from_user.id
 
         keyboard_markup = generate_sessions_keyboard(user_id)
 
@@ -77,7 +75,6 @@ async def user_commands_handler(message: Message):
         await message.answer(MESSAGES['/change_number'], parse_mode='HTML')
 
     elif command == '/change':
-        user_id = message.from_user.id
         username = message.from_user.username
         command_args = message.text.split()
 
