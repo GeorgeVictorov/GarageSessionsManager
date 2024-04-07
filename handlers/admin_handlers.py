@@ -18,29 +18,105 @@ router = Router()
 router.message.middleware(RegistrationMiddleware())
 
 
-@router.message(Command(commands='admin'), IsAdmin())
-async def admin_start(message: Message):
-    username = message.from_user.username
-    await message.answer(MESSAGES['/admin'].format(username), parse_mode='HTML')
+@router.message(IsAdmin(), Command(commands=(
+        'admin', 'admin_upcoming', 'admin_cancel', 'admin_payment', 'admin_sessions', 'admin_price', 'admin_users',
+        'admin_update_price', 'ban_user', 'update_price', 'ban')))
+async def admin_commands(message: Message):
+    command = message.text.split()[0]
 
+    if command == '/admin':
+        username = message.from_user.username
+        await message.answer(MESSAGES['/admin'].format(username), parse_mode='HTML')
 
-@router.message(Command(commands='admin_upcoming'), IsAdmin())
-async def admin_upcoming(message: Message):
-    booked_sessions = admin_upcoming_sessions()
-    response_message = format_sessions(booked_sessions)
-    await message.answer(response_message, parse_mode='HTML')
+    elif command == '/admin_upcoming':
+        booked_sessions = admin_upcoming_sessions()
+        response_message = format_sessions(booked_sessions)
+        await message.answer(response_message, parse_mode='HTML')
 
+    elif command == '/admin_cancel':
+        keyboard_markup = generate_admin_sessions()
 
-@router.message(Command(commands='admin_cancel'), IsAdmin())
-async def admin_cancel(message: Message):
-    keyboard_markup = generate_admin_sessions()
+        if keyboard_markup.inline_keyboard:
+            response_message = MESSAGES['/admin_cancel']
+        else:
+            response_message = MESSAGES['/admin_no_upcoming']
 
-    if keyboard_markup.inline_keyboard:
-        response_message = MESSAGES['/admin_cancel']
-    else:
-        response_message = MESSAGES['/admin_no_upcoming']
+        await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
 
-    await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+    elif command == '/admin_payment':
+        keyboard_markup = generate_admin_unpaid_sessions()
+
+        if keyboard_markup.inline_keyboard:
+            response_message = MESSAGES['/admin_payment']
+        else:
+            response_message = MESSAGES['/admin_no_payment']
+
+        await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+
+    elif command == '/admin_sessions':
+        cols, rows = get_sessions_history()
+        if cols:
+            csv_data = history_to_csv(cols, rows)
+            file_name = generate_filename(rows)
+            await message.answer(text=MESSAGES['/admin_sessions'], parse_mode='HTML')
+            await message.answer_document(BufferedInputFile(csv_data.encode(), filename=file_name))
+
+    elif command == '/admin_price':
+        type_prices = get_type_prices()
+        if type_prices:
+            price_message = "<b>Type Prices:</b>\n\n"
+            for type_desc, price in type_prices:
+                price_message += f"{type_desc}: {price}\n"
+            await message.answer(price_message, parse_mode='HTML')
+
+    elif command == '/admin_users':
+        users = get_users()
+        if users:
+            user_message = "<b>Users:</b>\n\n"
+            for user_id, username, phone, ban in users:
+                user_message += f"<b>{username}</b> | ID: <b>{user_id}</b>\n"
+                user_message += f"{phone} | {ban}\n\n"
+            await message.answer(user_message, parse_mode='HTML')
+
+    elif command == '/admin_update_price':
+        await message.answer(MESSAGES['/admin_update_price'], parse_mode='HTML')
+
+    elif command == '/update_price':
+        command_args = message.text.split()
+
+        if len(command_args) != 3:
+            await message.answer(MESSAGES['/admin_update_price_error'])
+            return
+
+        _, type_id, new_price = message.text.split()
+        type_desc = update_types_price(type_id, new_price)
+        if type_desc is not None:
+            await message.answer(f"Price for type: <b>{type_desc}</b> updated to <b>{new_price}</b>.",
+                                 parse_mode='HTML')
+        else:
+            await message.answer("An error occurred while updating price. Please try again later.")
+
+    elif command == '/ban_user':
+        await message.answer(MESSAGES['/ban_user'], parse_mode='HTML')
+
+    elif command == '/ban':
+        command_args = message.text.split()
+
+        if len(command_args) != 3:
+            await message.answer(MESSAGES['/ban_user_error'])
+            return
+
+        _, user_id, status = message.text.split()
+        user_id = int(user_id)
+        if user_id not in load_config().tg_bot.admin_ids:
+            status = admin_ban_or_unban_user(user_id, int(status))
+            if status is not None:
+                update_cached_users()
+                await message.answer(f"Status for: <b>{user_id}</b> has been changed.", parse_mode='HTML')
+            else:
+                await message.answer("An error occurred while changing the status.")
+        else:
+            await message.answer("Impossible to ban an admin.")
 
 
 @router.callback_query(F.data == 'admin_close', IsAdmin())
@@ -49,94 +125,126 @@ async def close_admin_cancel_upcoming_sessions(callback_query: CallbackQuery):
                                            parse_mode='HTML')
 
 
-@router.message(Command(commands='admin_payment'), IsAdmin())
-async def admin_payment(message: Message):
-    keyboard_markup = generate_admin_unpaid_sessions()
-
-    if keyboard_markup.inline_keyboard:
-        response_message = MESSAGES['/admin_payment']
-    else:
-        response_message = MESSAGES['/admin_no_payment']
-
-    await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
-
-
-@router.message(Command(commands='admin_sessions'), IsAdmin())
-async def send_session_history(message: Message):
-    cols, rows = get_sessions_history()
-    if cols:
-        csv_data = history_to_csv(cols, rows)
-        file_name = generate_filename(rows)
-        await message.answer(text=MESSAGES['/admin_sessions'], parse_mode='HTML')
-        await message.answer_document(BufferedInputFile(csv_data.encode(), filename=file_name))
-
-
-@router.message(Command(commands='admin_price'), IsAdmin())
-async def send_type_prices(message: Message):
-    type_prices = get_type_prices()
-    if type_prices:
-        price_message = "<b>Type Prices:</b>\n\n"
-        for type_desc, price in type_prices:
-            price_message += f"{type_desc}: {price}\n"
-        await message.answer(price_message, parse_mode='HTML')
-
-
-@router.message(Command(commands='admin_users'), IsAdmin())
-async def send_user_list(message: Message):
-    users = get_users()
-    if users:
-        user_message = "<b>Users:</b>\n\n"
-        for user_id, username, phone, ban in users:
-            user_message += f"<b>{username}</b> | ID: <b>{user_id}</b>\n"
-            user_message += f"{phone} | {ban}\n\n"
-        await message.answer(user_message, parse_mode='HTML')
-
-
-@router.message(Command('admin_update_price'), IsAdmin())
-async def update_price(message: Message):
-    await message.answer(MESSAGES['/admin_update_price'], parse_mode='HTML')
-
-
-@router.message(Command(commands='update_price'), IsAdmin())
-async def confirm_update_price(message: Message):
-    command_args = message.text.split()
-
-    if len(command_args) != 3:
-        await message.answer(MESSAGES['/admin_update_price_error'])
-        return
-
-    _, type_id, new_price = message.text.split()
-    type_desc = update_types_price(type_id, new_price)
-    if type_desc is not None:
-        await message.answer(f"Price for type: <b>{type_desc}</b> updated to <b>{new_price}</b>.", parse_mode='HTML')
-    else:
-        await message.answer("An error occurred while updating price. Please try again later.")
-
-
-@router.message(Command('ban_user'), IsAdmin())
-async def ban_user(message: Message):
-    await message.answer(MESSAGES['/ban_user'], parse_mode='HTML')
-
-
-@router.message(Command(commands='ban'), IsAdmin())
-async def ban_or_unban(message: Message):
-    command_args = message.text.split()
-
-    if len(command_args) != 3:
-        await message.answer(MESSAGES['/ban_user_error'])
-        return
-
-    _, user_id, status = message.text.split()
-    user_id = int(user_id)
-    if user_id not in load_config().tg_bot.admin_ids:
-        status = admin_ban_or_unban_user(user_id, int(status))
-        if status is not None:
-            update_cached_users()
-            await message.answer(f"Status for: <b>{user_id}</b> has been changed.", parse_mode='HTML')
-        else:
-            await message.answer("An error occurred while changing the status.")
-    else:
-        await message.answer("Impossible to ban an admin.")
+#
+# @router.message(Command(commands='admin'), IsAdmin())
+# async def admin_start(message: Message):
+#     username = message.from_user.username
+#     await message.answer(MESSAGES['/admin'].format(username), parse_mode='HTML')
+#
+#
+# @router.message(Command(commands='admin_upcoming'), IsAdmin())
+# async def admin_upcoming(message: Message):
+#     booked_sessions = admin_upcoming_sessions()
+#     response_message = format_sessions(booked_sessions)
+#     await message.answer(response_message, parse_mode='HTML')
+#
+#
+# @router.message(Command(commands='admin_cancel'), IsAdmin())
+# async def admin_cancel(message: Message):
+#     keyboard_markup = generate_admin_sessions()
+#
+#     if keyboard_markup.inline_keyboard:
+#         response_message = MESSAGES['/admin_cancel']
+#     else:
+#         response_message = MESSAGES['/admin_no_upcoming']
+#
+#     await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+#
+#
+# @router.callback_query(F.data == 'admin_close', IsAdmin())
+# async def close_admin_cancel_upcoming_sessions(callback_query: CallbackQuery):
+#     await callback_query.message.edit_text(text=INFO['close'],
+#                                            parse_mode='HTML')
+#
+#
+# @router.message(Command(commands='admin_payment'), IsAdmin())
+# async def admin_payment(message: Message):
+#     keyboard_markup = generate_admin_unpaid_sessions()
+#
+#     if keyboard_markup.inline_keyboard:
+#         response_message = MESSAGES['/admin_payment']
+#     else:
+#         response_message = MESSAGES['/admin_no_payment']
+#
+#     await message.answer(response_message, parse_mode='HTML', reply_markup=keyboard_markup)
+#
+#
+# @router.message(Command(commands='admin_sessions'), IsAdmin())
+# async def send_session_history(message: Message):
+#     cols, rows = get_sessions_history()
+#     if cols:
+#         csv_data = history_to_csv(cols, rows)
+#         file_name = generate_filename(rows)
+#         await message.answer(text=MESSAGES['/admin_sessions'], parse_mode='HTML')
+#         await message.answer_document(BufferedInputFile(csv_data.encode(), filename=file_name))
+#
+#
+# @router.message(Command(commands='admin_price'), IsAdmin())
+# async def send_type_prices(message: Message):
+#     type_prices = get_type_prices()
+#     if type_prices:
+#         price_message = "<b>Type Prices:</b>\n\n"
+#         for type_desc, price in type_prices:
+#             price_message += f"{type_desc}: {price}\n"
+#         await message.answer(price_message, parse_mode='HTML')
+#
+#
+# @router.message(Command(commands='admin_users'), IsAdmin())
+# async def send_user_list(message: Message):
+#     users = get_users()
+#     if users:
+#         user_message = "<b>Users:</b>\n\n"
+#         for user_id, username, phone, ban in users:
+#             user_message += f"<b>{username}</b> | ID: <b>{user_id}</b>\n"
+#             user_message += f"{phone} | {ban}\n\n"
+#         await message.answer(user_message, parse_mode='HTML')
+#
+#
+# @router.message(Command('admin_update_price'), IsAdmin())
+# async def update_price(message: Message):
+#     await message.answer(MESSAGES['/admin_update_price'], parse_mode='HTML')
+#
+#
+# @router.message(Command(commands='update_price'), IsAdmin())
+# async def confirm_update_price(message: Message):
+#     command_args = message.text.split()
+#
+#     if len(command_args) != 3:
+#         await message.answer(MESSAGES['/admin_update_price_error'])
+#         return
+#
+#     _, type_id, new_price = message.text.split()
+#     type_desc = update_types_price(type_id, new_price)
+#     if type_desc is not None:
+#         await message.answer(f"Price for type: <b>{type_desc}</b> updated to <b>{new_price}</b>.", parse_mode='HTML')
+#     else:
+#         await message.answer("An error occurred while updating price. Please try again later.")
+#
+#
+# @router.message(Command('ban_user'), IsAdmin())
+# async def ban_user(message: Message):
+#     await message.answer(MESSAGES['/ban_user'], parse_mode='HTML')
+#
+#
+# @router.message(Command(commands='ban'), IsAdmin())
+# async def ban_or_unban(message: Message):
+#     command_args = message.text.split()
+#
+#     if len(command_args) != 3:
+#         await message.answer(MESSAGES['/ban_user_error'])
+#         return
+#
+#     _, user_id, status = message.text.split()
+#     user_id = int(user_id)
+#     if user_id not in load_config().tg_bot.admin_ids:
+#         status = admin_ban_or_unban_user(user_id, int(status))
+#         if status is not None:
+#             update_cached_users()
+#             await message.answer(f"Status for: <b>{user_id}</b> has been changed.", parse_mode='HTML')
+#         else:
+#             await message.answer("An error occurred while changing the status.")
+#     else:
+#         await message.answer("Impossible to ban an admin.")
 
 
 @router.callback_query(AdminCancelCallback.filter(), IsAdmin())
