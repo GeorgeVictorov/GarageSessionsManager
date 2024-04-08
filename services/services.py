@@ -1,7 +1,9 @@
+import sys
 import hashlib
 import logging
 from datetime import datetime, timedelta
 from typing import List, Dict
+from database.db import Database
 
 
 class SessionManager:
@@ -62,3 +64,25 @@ def hash_file_data(data: str) -> str:
         return file_hash.hexdigest()
     except Exception as e:
         logging.error(f"Error hashing file data: {e}")
+
+
+def sigterm_handler():
+    db_instance = Database()
+    try:
+        logging.info("SIGTERM received. Shutting down...")
+        db_instance.close_database()
+        sys.exit(0)
+    except Exception as e:
+        logging.error(f"Error in sigterm_handler: {e}")
+        sys.exit(1)
+
+
+def sigint_handler():
+    db_instance = Database()
+    try:
+        logging.info("Received SIGINT signal. Shutting down...")
+        db_instance.close_database()
+        sys.exit(0)
+    except Exception as e:
+        logging.error(f"Error in sigint_handler: {e}")
+        sys.exit(1)
