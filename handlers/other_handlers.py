@@ -2,7 +2,7 @@ import re
 from aiogram import F, Router
 from aiogram.types import Message, ContentType
 from lexicon.lexicon import MESSAGES
-from database.sqlite import Database, update_cached_users
+from database.db import Database, update_cached_users
 from database.db_admin import clear_cache
 from database.db_admin import admin_user_status
 from config_data.config import load_config

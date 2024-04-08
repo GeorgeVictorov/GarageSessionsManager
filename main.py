@@ -5,7 +5,7 @@ from config_data.config import load_config
 from handlers import user_handlers, admin_handlers, other_handlers
 from logger.logger import setup_logger
 from keyboards.main_menu import set_main_menu
-from database.sqlite import Database
+from database.db import Database
 
 
 async def init_db():

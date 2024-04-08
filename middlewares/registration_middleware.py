@@ -2,7 +2,7 @@ from aiogram.types import Message
 from typing import Callable, Dict, Any, Awaitable
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 from lexicon.lexicon import MESSAGES
-from database.sqlite import Database
+from database.db import Database
 
 
 class RegistrationMiddleware(BaseMiddleware):

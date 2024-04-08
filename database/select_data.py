@@ -2,7 +2,7 @@ import io
 import csv
 import logging
 from datetime import datetime
-from database.sqlite import Database
+from database.db import Database
 from services.services import hash_file_data
 
 SESSIONS = 'garage_sessions'

@@ -7,7 +7,7 @@ from database.db_admin import admin_upcoming_sessions, admin_cancel_session, adm
     admin_confirm_session_payment, update_types_price, admin_ban_or_unban_user
 from database.select_data import get_sessions_history, history_to_csv, generate_filename, get_type_prices, \
     get_users
-from database.sqlite import update_cached_users
+from database.db import update_cached_users
 from database.db_admin import clear_cache
 from services.admin import format_sessions
 from filters.admin import IsAdmin

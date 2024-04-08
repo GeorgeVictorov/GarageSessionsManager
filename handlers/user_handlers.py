@@ -12,7 +12,7 @@ from keyboards.types_keyboard import generate_types_duration
 from keyboards.hours_keyboard import generate_hours_keyboard
 from database.db_user import book_new_session, upcoming_sessions, cancel_session, change_user_number
 from database.db_admin import admin_canceled_info
-from database.sqlite import update_cached_users
+from database.db import update_cached_users
 from database.db_admin import clear_cache
 from config_data.types_config import TYPES
 from config_data.config import load_config

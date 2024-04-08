@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from cachetools import cached, TTLCache
-from database.sqlite import Database
+from database.db import Database
 
 SESSIONS = 'garage_sessions'
 TYPES = 'session_types'
