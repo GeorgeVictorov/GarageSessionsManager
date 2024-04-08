@@ -26,10 +26,10 @@ MESSAGES: dict[str, str] = {
                        '{}',
     '/ban_user': "<b>To ban or unban a user, please provide user_id and status:</b>\n\n"
                  "<i>/ban_user user_id status</i>\n\n"
-                 "For instance: /ban_user 123456321 1\n\n"
+                 "For instance: /ban_user 123456321 true\n\n"
                  "<b>User status:</b>\n\n"
-                 "- Banned: 1\n"
-                 "- Unbanned: 0",
+                 "- Banned: true\n"
+                 "- Unbanned: false",
     '/ban_user_error': "Incorrect format. Please provide user_id and status.",
     '/cancel': '<b>To cancel your booked sessions, simply click on it:</b>',
     '/cancel_success': 'Your session has been successfully canceled.',

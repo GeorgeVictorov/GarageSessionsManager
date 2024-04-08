@@ -4,12 +4,10 @@ from aiogram.types import CallbackQuery, Message, BufferedInputFile
 from keyboards.keyboards import generate_admin_sessions, generate_admin_unpaid_sessions
 from lexicon.lexicon import MESSAGES, INFO
 from database.db_admin import admin_upcoming_sessions, admin_cancel_session, admin_canceled_info, \
-    admin_confirm_session_payment, update_types_price, admin_ban_or_unban_user
-from database.select_data import get_sessions_history, history_to_csv, generate_filename, get_type_prices, \
-    get_users
+    admin_confirm_session_payment, update_types_price, admin_ban_or_unban_user, clear_cache
+from database.select_data_admin import get_sessions_history, get_type_prices, get_users
 from database.db import update_cached_users
-from database.db_admin import clear_cache
-from services.admin import format_sessions
+from services.admin import format_sessions, history_to_csv, generate_filename
 from filters.admin import IsAdmin
 from filters.callback_factory import AdminCancelCallback, AdminPaymentCallback
 from config_data.config import load_config
@@ -103,7 +101,7 @@ async def admin_commands_handler(message: Message):
         _, user_id, status = message.text.split()
         user_id = int(user_id)
         if user_id not in load_config().tg_bot.admin_ids:
-            status = admin_ban_or_unban_user(user_id, int(status))
+            status = admin_ban_or_unban_user(user_id, status)
             if status is not None:
                 update_cached_users()
                 clear_cache()
@@ -130,7 +128,7 @@ async def admin_commands_handler(message: Message):
 
 
 @router.callback_query(F.data == 'admin_close', IsAdmin())
-async def close_admin_cancel_upcoming_sessions(callback_query: CallbackQuery):
+async def close_admin(callback_query: CallbackQuery):
     await callback_query.message.edit_text(text=INFO['close'],
                                            parse_mode='HTML')
 

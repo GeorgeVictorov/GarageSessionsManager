@@ -72,22 +72,22 @@ class Database:
                                                           )''')
 
                 cur.execute(f'''create table if not exists {SESSIONS} (
-                                                    id integer primary key,
-                                                    user_id int,
-                                                    user_username text,
-                                                    session_start timestamp,
-                                                    session_end timestamp,
-                                                    duration int,
-                                                    type int,
-                                                    is_payed boolean default false,
-                                                    is_canceled boolean default false,
-                                                    foreign key (type) references {TYPES} (id),
-                                                    foreign key (user_id) references {USERS} (user_id),
-                                                    foreign key (user_username) references {USERS} (user_username)
+                                    id serial primary key,
+                                    user_id int,
+                                    user_username text,
+                                    session_start timestamp,
+                                    session_end timestamp,
+                                    duration int,
+                                    type int,
+                                    is_payed boolean default false,
+                                    is_canceled boolean default false,
+                                    foreign key (type) references {TYPES} (id),
+                                    foreign key (user_id) references {USERS} (user_id),
+                                    foreign key (user_username) references {USERS} (user_username)
                                                               )''')
 
                 cur.execute(f'''create table if not exists {PAYMENTS} (
-                                    payment_id integer primary key,
+                                    payment_id serial primary key,
                                     session_id int unique,
                                     total_price int,
                                     payed_on date default current_date,
@@ -95,27 +95,27 @@ class Database:
                                                                       )''')
 
                 self.db_connection.commit()
-            logging.info(f"Database tables: «{SESSIONS}», «{TYPES}», {USERS} and {PAYMENTS} created or verified.")
+            logging.info(f"Database tables: «{SESSIONS}», «{TYPES}», «{USERS}» and «{PAYMENTS}» created or verified.")
 
         except Exception as e:
             logging.error(f"Error initializing database: {e}.")
 
     def set_default_values(self):
         try:
-            with self.get_connection().cursor() as cur:
-                cur.execute(f'''insert into {TYPES}
+            with self.get_connection().cursor() as cursor:
+                cursor.execute(f'''insert into {TYPES}
                                 select 1, 'Drummer', 125
                                 where
                                     not exists (select 1 from {TYPES} where id = 1)
                             ''')
 
-                cur.execute(f'''insert into {TYPES}
+                cursor.execute(f'''insert into {TYPES}
                                 select 2, 'Small band', 200
                                 where
                                     not exists (select 1 from {TYPES} where id = 2)
                             ''')
 
-                cur.execute(f'''insert into {TYPES}
+                cursor.execute(f'''insert into {TYPES}
                                 select 3, 'Norm band', 300
                                 where
                                     not exists (select 1 from {TYPES} where id = 3)
@@ -130,9 +130,9 @@ class Database:
     @cached(cache=cache)
     def check_user_registration(self, user_id):
         try:
-            with self.get_connection().cursor() as cur:
-                cur.execute(f'select 1 from {USERS} where user_id = ? and is_banned = 0', (user_id,))
-                is_registered = cur.fetchone()
+            with self.get_connection().cursor() as cursor:
+                cursor.execute(f'select 1 from {USERS} where user_id = %s and is_banned = false', (user_id,))
+                is_registered = cursor.fetchone()
                 logging.info(f'Retrieved check_user_registration data.')
                 return is_registered
         except Exception as e:
@@ -140,9 +140,9 @@ class Database:
 
     def add_user(self, user_id, username, phone_number):
         try:
-            with self.get_connection().cursor() as cur:
-                cur.execute(f'''insert into {USERS} (user_id, user_username, phone_number)
-                                values (?, ?, ?)''', (user_id, username, phone_number))
+            with self.get_connection().cursor() as cursor:
+                cursor.execute(f'''insert into {USERS} (user_id, user_username, phone_number)
+                                values (%s, %s, %s)''', (user_id, username, phone_number))
                 self.db_connection.commit()
             logging.info(f'New user: {username} added to {USERS} table.')
         except Exception as e:

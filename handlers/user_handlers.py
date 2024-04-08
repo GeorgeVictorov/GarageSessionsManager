@@ -5,17 +5,17 @@ from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from lexicon.lexicon import MESSAGES, INFO
-from services.services import SessionManager, parse_session_data, format_sessions_info
+from services.services import SessionManager
+from services.user import parse_session_data, format_sessions_info
 from keyboards.keyboards import generate_confirm_session, generate_sessions_keyboard
 from keyboards.calendar_keyboard import generate_calendar
 from keyboards.types_keyboard import generate_types_duration
 from keyboards.hours_keyboard import generate_hours_keyboard
 from database.db_user import book_new_session, upcoming_sessions, cancel_session, change_user_number
-from database.db_admin import admin_canceled_info
+from database.db_admin import admin_canceled_info, clear_cache
 from database.db import update_cached_users
-from database.db_admin import clear_cache
-from config_data.types_config import TYPES
 from config_data.config import load_config
+from config_data.types_config import TYPES
 from config_data.commands import USER_COMMANDS
 from filters.callback_factory import ChooseDateCallback, ChooseHourCallback, CancelSessionCallback
 from middlewares.registration_middleware import RegistrationMiddleware
