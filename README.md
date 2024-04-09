@@ -26,10 +26,11 @@ In addition to the core features available to users, administrators have access 
 * Approving payments: Review and approve payments for booked sessions.
 * Cancelling sessions: Admins can cancel sessions if necessary.
 * Getting all sessions' history.
+* Sending messages to all users: Admins can send messages to all users for announcements or important notifications.
 
 The project employs [aiogram](https://github.com/aiogram/aiogram) and [psycopg](https://github.com/psycopg/psycopg) for its core functionalities.
 
-[PostgresSQL database](https://www.postgresql.org) is used for storing session data and user information.
+[PostgreSQL database](https://www.postgresql.org) is used for storing session data and user information.
 
 # Overview
 
