@@ -32,3 +32,5 @@ The project employs [aiogram](https://github.com/aiogram/aiogram) and [psycopg](
 [PostgresSQL database](https://www.postgresql.org) is used for storing session data and user information.
 
 # Overview
+
+![IMG_1058-2](https://github.com/GeorgeVictorov/GarageSessionsManager/assets/120365126/6e5a12dd-078d-4099-af7a-e169edac8704)
