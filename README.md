@@ -33,4 +33,3 @@ The project employs [aiogram](https://github.com/aiogram/aiogram) and [psycopg](
 
 # Overview
 
-![IMG_1058-2-ezgif com-resize](https://github.com/GeorgeVictorov/GarageSessionsManager/assets/120365126/72e5b282-5ba3-41cd-b997-78575d5f0858)
