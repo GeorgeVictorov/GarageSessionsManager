@@ -32,4 +32,3 @@ The project employs [aiogram](https://github.com/aiogram/aiogram) and [psycopg](
 [PostgresSQL database](https://www.postgresql.org) is used for storing session data and user information.
 
 # Overview
-
