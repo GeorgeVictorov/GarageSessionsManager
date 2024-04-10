@@ -157,6 +157,7 @@ def admin_user_status(user_id: int):
     conn = database.get_connection()
     try:
         with conn.cursor() as cursor:
+            logging.debug(f"Executing SQL query: select is_banned from {USERS} where user_id = %s")
             cursor.execute(f'select is_banned from {USERS} where user_id = %s', (user_id,))
             status = cursor.fetchone()
             if status is not None:
@@ -164,7 +165,7 @@ def admin_user_status(user_id: int):
                 logging.info("Successfully fetched user status.")
                 return status
             else:
-                logging.error("No status found for the user.")
-                return None
+                logging.info("No status found for the user.")
+                return 0
     except Exception as e:
         logging.error(f"An error occurred in admin_user_status function: {str(e)}.")

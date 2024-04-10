@@ -29,10 +29,9 @@ def generate_hours_keyboard(selected_date: str, selected_duration: int) -> Inlin
         if any(interval.is_intersection(proposed_session) for interval in unavailable_intervals):
             row.append(InlineKeyboardButton(text="✖️", callback_data="ignore"))
         else:
-            # callback_data = f"hour-{session_start.strftime('%H:%M:%S')}"
             row.append(
                 InlineKeyboardButton(text=session_start.strftime('%H:%M'), callback_data=ChooseHourCallback(
-                    hour=f'{session_start.strftime('%H:%M:%S')}').pack()
+                    hour=f'{session_start.strftime("%H:%M:%S")}').pack()
                                      ))
 
         if len(row) == 4:

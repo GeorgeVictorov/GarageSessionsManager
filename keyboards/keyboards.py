@@ -33,7 +33,7 @@ def generate_sessions_keyboard(user_id):
             )
             keyboard_markup.inline_keyboard.append([InlineKeyboardButton(
                 text=session_info,
-                callback_data=CancelSessionCallback(id=f'{user_session['id']}').pack())]
+                callback_data=CancelSessionCallback(id=f'{user_session["id"]}').pack())]
             )
 
         keyboard_markup.inline_keyboard.append([
@@ -55,7 +55,7 @@ def generate_admin_sessions():
             )
             keyboard_markup.inline_keyboard.append([InlineKeyboardButton(
                 text=session_info,
-                callback_data=AdminCancelCallback(id=f'{user_session['id']}').pack())]
+                callback_data=AdminCancelCallback(id=f'{user_session["id"]}').pack())]
             )
 
         keyboard_markup.inline_keyboard.append([
@@ -78,7 +78,7 @@ def generate_admin_unpaid_sessions():
             )
             keyboard_markup.inline_keyboard.append([InlineKeyboardButton(
                 text=session_info,
-                callback_data=AdminPaymentCallback(id=f'{user_session['id']}').pack())]
+                callback_data=AdminPaymentCallback(id=f'{user_session["id"]}').pack())]
             )
 
         keyboard_markup.inline_keyboard.append([
