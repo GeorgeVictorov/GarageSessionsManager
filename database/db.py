@@ -66,7 +66,7 @@ class Database:
                 cur.execute(f'''create table if not exists {USERS} (
                                     id serial primary key,
                                     user_id bigint unique,
-                                    user_username text,
+                                    user_username text unique,
                                     phone_number text,
                                     is_banned boolean default false
                                                           )''')
