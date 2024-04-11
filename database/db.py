@@ -65,15 +65,15 @@ class Database:
 
                 cur.execute(f'''create table if not exists {USERS} (
                                     id serial primary key,
-                                    user_id int unique,
-                                    user_username text unique,
+                                    user_id bigint unique,
+                                    user_username text,
                                     phone_number text,
                                     is_banned boolean default false
                                                           )''')
 
                 cur.execute(f'''create table if not exists {SESSIONS} (
                                     id serial primary key,
-                                    user_id int,
+                                    user_id bigint,
                                     user_username text,
                                     session_start timestamp,
                                     session_end timestamp,
@@ -138,7 +138,7 @@ class Database:
         except Exception as e:
             logging.error(f"Error getting data from «{USERS}»: {e}.")
 
-    def add_user(self, user_id, username, phone_number):
+    def add_user(self, user_id: int, username: str, phone_number: str):
         try:
             with self.get_connection().cursor() as cursor:
                 cursor.execute(f'''insert into {USERS} (user_id, user_username, phone_number)

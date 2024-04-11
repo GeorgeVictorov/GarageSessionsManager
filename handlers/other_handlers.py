@@ -28,6 +28,8 @@ async def process_phone_number(message: Message):
                                                     r'\1 (\2) \3-\4-\5',
                                                     phone_number)
                     username = message.from_user.username
+                    if username is None:
+                        username = f'{user_id}'
                     db_manager.add_user(user_id, username, formatted_phone_number)
                     update_cached_users()
                     clear_cache()
