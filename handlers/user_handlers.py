@@ -38,7 +38,7 @@ async def user_commands_handler(message: Message):
 
         session_manager.set_session(user_id, {
             'username': username,
-            'type': 'Nothing',
+            'type': 'no type',
             'duration': 3,
             'date': '',
             'time': ''
@@ -208,7 +208,7 @@ async def types_navigation(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
 
     session_data = session_manager.get_session(user_id)
-    if action == 'confirm_types' and session_data['type'] and session_data['type'] != 'Nothing':
+    if action == 'confirm_types' and session_data['type'] and session_data['type'] != 'no type':
         await callback_query.message.edit_text(text=f'Choose time:')
         await callback_query.message.edit_reply_markup(
             reply_markup=generate_hours_keyboard(session_data['date'], session_data['duration']))
