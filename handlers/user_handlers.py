@@ -35,6 +35,8 @@ async def user_commands_handler(message: Message):
 
     elif command == '/new':
         username = message.from_user.username
+        if username is None:
+            username = f'{user_id}'
 
         session_manager.set_session(user_id, {
             'username': username,
@@ -73,6 +75,8 @@ async def user_commands_handler(message: Message):
 
     elif command == '/change_number':
         username = message.from_user.username
+        if username is None:
+            username = f'{user_id}'
         command_args = message.text.split()
 
         if len(command_args) != 2:
@@ -107,6 +111,8 @@ async def cancel_upcoming_sessions(callback_query: CallbackQuery,
     action, session_id = callback_data.pack().split('-')
     user_id = callback_query.from_user.id
     username = callback_query.from_user.username
+    if username is None:
+        username = f'{user_id}'
     session_start, duration, type_desc = admin_canceled_info(session_id)
     cancel_session(int(session_id))
 
@@ -137,6 +143,8 @@ async def session_navigation(callback_query: CallbackQuery):
     action = callback_query.data
     user_id = callback_query.from_user.id
     username = callback_query.from_user.username
+    if username is None:
+        username = f'{user_id}'
 
     if action == 'return_session':
         session_data = session_manager.get_session(user_id)
@@ -169,6 +177,8 @@ async def hours_navigation(callback_query: CallbackQuery):
     action = callback_query.data
     user_id = callback_query.from_user.id
     username = callback_query.from_user.username
+    if username is None:
+        username = f'{user_id}'
 
     if action == 'confirm_session' and session_manager.get_session(user_id)['time']:
         session_date, _, duration, session_type = parse_session_data(session_manager.get_session(user_id))
