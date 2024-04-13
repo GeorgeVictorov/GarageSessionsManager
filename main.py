@@ -18,6 +18,7 @@ async def init_db():
         logging.info('Database initialized successfully.')
     except Exception as e:
         logging.error(f"Error initializing database: {e}")
+        return
 
 
 async def main():
